@@ -76,9 +76,11 @@ namespace Labs.Lab1
 
                                             0.6f, -0.2f,
 
-                                            0.2f, -0.2f
+                                            0.2f, -0.2f,
                                             -0.6f, -0.6f,
-                                            0.2f, -0.6f
+                                            0.2f, -0.6f,
+
+                                            -0.6f, -0.2f
             };
 
             uint[] indices = new uint[]{ 0, 1, 2,
@@ -91,7 +93,8 @@ namespace Labs.Lab1
                                          10, 12, 13,
                                          14, 15, 16,
                                          14, 16, 17,
-                                         18, 19, 20
+                                         18, 19, 20,
+                                         21, 19, 18
             };
 
             GL.GenBuffers(2, mVertexBufferObjectIDArray);
@@ -145,7 +148,7 @@ namespace Labs.Lab1
 
             #endregion
 
-            GL.DrawElements(PrimitiveType.Triangles, 33, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(PrimitiveType.Triangles, 36, DrawElementsType.UnsignedInt, 0);
 
             this.SwapBuffers();
         }
