@@ -28,11 +28,12 @@ namespace Labs.Lab1
 
         protected override void OnLoad(EventArgs e)
         {
-            GL.ClearColor(Color4.White);
+            GL.ClearColor(Color4.DarkBlue);
+            GL.Enable(EnableCap.CullFace);
 
             float[] vertices = new float[] { -0.8f, -0.8f,
-                                             -0.8f, 0.8f,
-                                             0.8f, 0.8f };
+                                             0.8f, 0.8f,
+                                             -0.8f, 0.8f };
 
             GL.GenBuffers(1, out mVertexBufferObjectID);
             GL.BindBuffer(BufferTarget.ArrayBuffer, mVertexBufferObjectID);
