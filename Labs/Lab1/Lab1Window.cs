@@ -48,58 +48,68 @@ namespace Labs.Lab1
             //                              1, 4, 5
             //};
 
-            float[] vertices = new float[]{ -0.4f, 0.6f,
-                                            -0.4f, 0.2f,
-                                            0.4f, 0.2f,
+            //float[] vertices = new float[]{ -0.4f, 0.6f,
+            //                                -0.4f, 0.2f,
+            //                                0.4f, 0.2f,
 
-                                            0.4f, 0.6f,
+            //                                0.4f, 0.6f,
 
-                                            -0.8f, 0.2f,
+            //                                -0.8f, 0.2f,
 
-                                            0.8f, 0.2f,
+            //                                0.8f, 0.2f,
 
-                                            -0.2f, 0.8f,
-                                            -0.2f, 0.6f,
-                                            0f, 0.6f,
+            //                                -0.2f, 0.8f,
+            //                                -0.2f, 0.6f,
+            //                                0f, 0.6f,
 
-                                            0f, 0.8f,
+            //                                0f, 0.8f,
 
-                                            0f, 0.2f,
-                                            0f, -0.2f,
-                                            0.6f, -0.2f,
+            //                                0f, 0.2f,
+            //                                0f, -0.2f,
+            //                                0.6f, -0.2f,
 
-                                            0.6f, 0.2f,
+            //                                0.6f, 0.2f,
 
-                                            0.4f, -0.2f,
-                                            0.4f, -0.6f,
-                                            0.6f, -0.6f,
+            //                                0.4f, -0.2f,
+            //                                0.4f, -0.6f,
+            //                                0.6f, -0.6f,
 
-                                            0.6f, -0.2f,
+            //                                0.6f, -0.2f,
 
-                                            0.2f, -0.2f,
-                                            -0.6f, -0.6f,
-                                            0.2f, -0.6f,
+            //                                0.2f, -0.2f,
+            //                                -0.6f, -0.6f,
+            //                                0.2f, -0.6f,
 
-                                            -0.6f, -0.2f,
+            //                                -0.6f, -0.2f,
 
-                                            -0.6f, 0.2f,
-                                            -0.4f, -0.2f
-            };
+            //                                -0.6f, 0.2f,
+            //                                -0.4f, -0.2f
+            //};
 
-            uint[] indices = new uint[]{ 0, 1, 2,
-                                         0, 2, 3,
-                                         0, 4, 1,
-                                         3, 2, 5,
-                                         6, 7, 8,
-                                         6, 8, 9,
-                                         10, 11, 12,
-                                         10, 12, 13,
-                                         14, 15, 16,
-                                         14, 16, 17,
-                                         18, 19, 20,
-                                         21, 19, 18,
-                                         22, 21, 23,
-                                         22, 23, 1
+            //uint[] indices = new uint[]{ 0, 1, 2,
+            //                             0, 2, 3,
+            //                             0, 4, 1,
+            //                             3, 2, 5,
+            //                             6, 7, 8,
+            //                             6, 8, 9,
+            //                             10, 11, 12,
+            //                             10, 12, 13,
+            //                             14, 15, 16,
+            //                             14, 16, 17,
+            //                             18, 19, 20,
+            //                             21, 19, 18,
+            //                             22, 21, 23,
+            //                             22, 23, 1
+            //};
+
+            float[] vertices = new float[] {  0.0f, 0.8f,
+                                  0.8f, 0.4f,
+                                  0.6f, -0.6f,
+                                 -0.6f, -0.6f,
+                                 -0.8f, 0.4f};
+
+            uint[] indices = new uint[] { 0,4,3,
+                                          2, 1
             };
 
             GL.GenBuffers(2, mVertexBufferObjectIDArray);
@@ -153,7 +163,8 @@ namespace Labs.Lab1
 
             #endregion
 
-            GL.DrawElements(PrimitiveType.Triangles, 42, DrawElementsType.UnsignedInt, 0);
+            //GL.DrawElements(PrimitiveType.Triangles, 42, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(PrimitiveType.TriangleStrip, 5, DrawElementsType.UnsignedInt, 0);
 
             this.SwapBuffers();
         }
