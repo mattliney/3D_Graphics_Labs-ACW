@@ -31,9 +31,18 @@ namespace Labs.Lab1
             GL.ClearColor(Color4.DarkBlue);
             GL.Enable(EnableCap.CullFace);
 
-            float[] vertices = new float[] { -0.8f, -0.8f,
-                                             0.8f, 0.8f,
-                                             -0.8f, 0.8f };
+            float[] vertices = new float[] { -0.4f, 0.0f,
+                                             0.4f, 0.0f,
+                                             0.0f, 0.6f,
+
+                                             -0.4f, 0.0f,
+                                             -0.8f, -0.6f,
+                                             0f, -0.6f,
+
+                                             0.4f, 0.0f,
+                                             0f, -0.6f,
+                                             0.8f, -0.6f
+            };
 
             GL.GenBuffers(1, out mVertexBufferObjectID);
             GL.BindBuffer(BufferTarget.ArrayBuffer, mVertexBufferObjectID);
@@ -72,7 +81,7 @@ namespace Labs.Lab1
 
             #endregion
 
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 9);
 
             this.SwapBuffers();
         }
