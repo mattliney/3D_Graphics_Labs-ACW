@@ -102,14 +102,29 @@ namespace Labs.Lab1
             //                             22, 23, 1
             //};
 
-            float[] vertices = new float[] {  0.0f, 0.8f,
-                                  0.8f, 0.4f,
-                                  0.6f, -0.6f,
-                                 -0.6f, -0.6f,
-                                 -0.8f, 0.4f};
+            float[] vertices = new float[] {  -0.8f, 0.2f,
+                                              -0.4f, 0.2f,
+                                              -0.4f, 0.6f,
 
-            uint[] indices = new uint[] { 2, 1, 3,
-                                          0, 4
+                                              0.4f, 0.6f,
+
+                                              0.4f, 0.2f,
+
+                                              0.8f, 0.2f,
+
+                                              0.6f, -0.6f,
+                                              0.6f, 0.2f,
+
+                                              0.2f, -0.6f
+            };
+
+            uint[] indices = new uint[] { 0, 1, 2,
+                                          1, 3, 2,
+                                          1, 4, 3,
+                                          4, 5, 3,
+                                          7, 6, 4,
+                                          4, 8, 6
+
             };
 
             GL.GenBuffers(2, mVertexBufferObjectIDArray);
@@ -164,7 +179,7 @@ namespace Labs.Lab1
             #endregion
 
             //GL.DrawElements(PrimitiveType.Triangles, 42, DrawElementsType.UnsignedInt, 0);
-            GL.DrawElements(PrimitiveType.TriangleStrip, 5, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(PrimitiveType.TriangleStrip, 100, DrawElementsType.UnsignedInt, 0);
 
             this.SwapBuffers();
         }
