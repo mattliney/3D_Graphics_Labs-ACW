@@ -31,7 +31,7 @@ namespace Labs.Lab2
 
         protected override void OnLoad(EventArgs e)
         {
-            mView = Matrix4.Identity;
+            mView = Matrix4.CreateTranslation(0, 0, -2);
 
             // Set some GL state
             GL.ClearColor(Color4.DodgerBlue);
@@ -82,7 +82,7 @@ namespace Labs.Lab2
             GL.UniformMatrix4(uViewLocation, true, ref mView);
 
             int uProjectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uProjection");
-            Matrix4 projection = Matrix4.CreateOrthographic(10, 10, -1, 1);
+            Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(1, (float)ClientRectangle.Width / ClientRectangle.Height, 0.5f, 5);
             GL.UniformMatrix4(uProjectionLocation, true, ref projection);
 
             base.OnLoad(e);
@@ -165,8 +165,8 @@ namespace Labs.Lab2
             if (mShader != null)
             {
                 int uProjectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uProjection");
-                int windowHeight = this.ClientRectangle.Height;
-                int windowWidth = this.ClientRectangle.Width;
+                float windowHeight = (float)this.ClientRectangle.Height;
+                float windowWidth = (float)this.ClientRectangle.Width;
 
                 if (windowHeight > windowWidth)
                 {
@@ -180,7 +180,7 @@ namespace Labs.Lab2
                 {
                     if (windowHeight < 1) { windowHeight = 1; }
 
-                    float ratio = windowWidth / windowHeight;
+                    float ratio = windowHeight / windowWidth;
                     Matrix4 projection = Matrix4.CreateOrthographic(10, ratio * 10, -1, 1);
                     GL.UniformMatrix4(uProjectionLocation, true, ref projection);
                 }
