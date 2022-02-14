@@ -27,9 +27,12 @@ namespace Labs.Lab2
         private int mVAO_ID;
         private ShaderUtility mShader;
         private ModelUtility mModel;
+        private Matrix4 mView;
 
         protected override void OnLoad(EventArgs e)
         {
+            mView = Matrix4.Identity;
+
             // Set some GL state
             GL.ClearColor(Color4.DodgerBlue);
             GL.Enable(EnableCap.DepthTest);
@@ -70,6 +73,18 @@ namespace Labs.Lab2
 
             GL.BindVertexArray(0);
 
+            Vector3 eye = new Vector3(0.0f, 0.5f, 0.5f);
+            Vector3 lookAt = new Vector3(0, 0, 0);
+            Vector3 up = new Vector3(0, 1, 0);
+            mView = Matrix4.LookAt(eye, lookAt, up);
+
+            int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
+            GL.UniformMatrix4(uViewLocation, true, ref mView);
+
+            int uProjectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uProjection");
+            Matrix4 projection = Matrix4.CreateOrthographic(10, 10, -1, 1);
+            GL.UniformMatrix4(uProjectionLocation, true, ref projection);
+
             base.OnLoad(e);
             
         }
@@ -78,10 +93,25 @@ namespace Labs.Lab2
         {
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            
+
+            int uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
+            Matrix4 m1 = Matrix4.CreateTranslation(-1f, 0, 0);
+            Matrix4 result = m1;
+
+            GL.UniformMatrix4(uModelLocation, true, ref result);
+
             GL.BindVertexArray(mVAO_ID);
             GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
-            
+
+            uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
+            m1 = Matrix4.CreateTranslation(1f, 0, 0);
+            result = m1;
+
+            GL.UniformMatrix4(uModelLocation, true, ref result);
+
+            GL.BindVertexArray(mVAO_ID);
+            GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+
             GL.BindVertexArray(0);
             this.SwapBuffers();
         }
@@ -95,6 +125,66 @@ namespace Labs.Lab2
             GL.DeleteVertexArray(mVAO_ID);
             mShader.Delete();
             base.OnUnload(e);
+        }
+
+        protected override void OnKeyPress(KeyPressEventArgs e)
+        {
+            base.OnKeyPress(e);
+            if (e.KeyChar == 'a')
+            {
+                mView = mView * Matrix4.CreateRotationY(-0.1f);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'd')
+            {
+                mView = mView * Matrix4.CreateRotationY(0.1f);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'w')
+            {
+                mView = mView * Matrix4.CreateTranslation(0, -0.01f, 0);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 's')
+            {
+                mView = mView * Matrix4.CreateTranslation(0, 0.01f, 0);
+                MoveCamera();
+            }
+        }
+
+        private void MoveCamera()
+        {
+            int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
+            GL.UniformMatrix4(uViewLocation, true, ref mView);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            GL.Viewport(this.ClientRectangle);
+            if (mShader != null)
+            {
+                int uProjectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uProjection");
+                int windowHeight = this.ClientRectangle.Height;
+                int windowWidth = this.ClientRectangle.Width;
+
+                if (windowHeight > windowWidth)
+                {
+                    if (windowWidth < 1) { windowWidth = 1; }
+
+                    float ratio = windowHeight / windowWidth;
+                    Matrix4 projection = Matrix4.CreateOrthographic(ratio * 10, 10, -1, 1);
+                    GL.UniformMatrix4(uProjectionLocation, true, ref projection);
+                }
+                else
+                {
+                    if (windowHeight < 1) { windowHeight = 1; }
+
+                    float ratio = windowWidth / windowHeight;
+                    Matrix4 projection = Matrix4.CreateOrthographic(10, ratio * 10, -1, 1);
+                    GL.UniformMatrix4(uProjectionLocation, true, ref projection);
+                }
+            }
         }
     }
 }
