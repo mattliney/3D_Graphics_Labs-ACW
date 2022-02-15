@@ -73,7 +73,7 @@ namespace Labs.Lab2
 
             GL.BindVertexArray(0);
 
-            Vector3 eye = new Vector3(0.0f, 0.5f, 0.5f);
+            Vector3 eye = new Vector3(0.0f, 0.5f, -4f);
             Vector3 lookAt = new Vector3(0, 0, 0);
             Vector3 up = new Vector3(0, 1, 0);
             mView = Matrix4.LookAt(eye, lookAt, up);
@@ -132,22 +132,32 @@ namespace Labs.Lab2
             base.OnKeyPress(e);
             if (e.KeyChar == 'a')
             {
-                mView = mView * Matrix4.CreateRotationY(-0.1f);
+                mView = mView * Matrix4.CreateTranslation(0.01f, 0, 0);
                 MoveCamera();
             }
             else if (e.KeyChar == 'd')
             {
-                mView = mView * Matrix4.CreateRotationY(0.1f);
+                mView = mView * Matrix4.CreateTranslation(-0.01f, 0, 0);
                 MoveCamera();
             }
             else if (e.KeyChar == 'w')
             {
-                mView = mView * Matrix4.CreateTranslation(0, -0.01f, 0);
+                mView = mView * Matrix4.CreateTranslation(0, -0.01f, 0.5f);
                 MoveCamera();
             }
             else if (e.KeyChar == 's')
             {
-                mView = mView * Matrix4.CreateTranslation(0, 0.01f, 0);
+                mView = mView * Matrix4.CreateTranslation(0, 0.01f, -0.5f);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'q')
+            {
+                mView = mView * Matrix4.CreateRotationY(0.1f);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'e')
+            {
+                mView = mView * Matrix4.CreateRotationY(-0.1f);
                 MoveCamera();
             }
         }
@@ -172,16 +182,16 @@ namespace Labs.Lab2
                 {
                     if (windowWidth < 1) { windowWidth = 1; }
 
-                    float ratio = windowHeight / windowWidth;
-                    Matrix4 projection = Matrix4.CreateOrthographic(ratio * 10, 10, -1, 1);
+                    float ratio = windowWidth / windowHeight;
+                    Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(1, ratio, 0.5f, 5);
                     GL.UniformMatrix4(uProjectionLocation, true, ref projection);
                 }
                 else
                 {
                     if (windowHeight < 1) { windowHeight = 1; }
 
-                    float ratio = windowHeight / windowWidth;
-                    Matrix4 projection = Matrix4.CreateOrthographic(10, ratio * 10, -1, 1);
+                    float ratio = windowWidth / windowHeight;
+                    Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(1, ratio, 0.5f, 5);
                     GL.UniformMatrix4(uProjectionLocation, true, ref projection);
                 }
             }
