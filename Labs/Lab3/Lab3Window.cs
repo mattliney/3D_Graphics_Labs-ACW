@@ -42,7 +42,7 @@ namespace Labs.Lab3
             int vNormalLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vNormal");
             int uLightDirectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uLightDirection");
 
-            Vector3 normalisedLightDirection, lightDirection = new Vector3(-1, -1, -1);
+            Vector3 normalisedLightDirection, lightDirection = new Vector3(2, 1, -8.5f);
             Vector3.Normalize(ref lightDirection, out normalisedLightDirection);
             GL.Uniform3(uLightDirectionLocation, normalisedLightDirection);
 
