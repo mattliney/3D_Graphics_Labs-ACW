@@ -32,13 +32,14 @@ namespace Labs.Lab3
         protected override void OnLoad(EventArgs e)
         {
             // Set some GL state
-            GL.ClearColor(Color4.Black);
+            GL.ClearColor(Color4.LightPink);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
 
             mShader = new ShaderUtility(@"Lab3/Shaders/vLighting.vert", @"Lab3/Shaders/fPassThrough.frag");
             GL.UseProgram(mShader.ShaderProgramID);
             int vPositionLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vPosition");
+            int vNormalLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vNormal");
 
             GL.GenVertexArrays(mVAO_IDs.Length, mVAO_IDs);
             GL.GenBuffers(mVBO_IDs.Length, mVBO_IDs);
@@ -84,6 +85,8 @@ namespace Labs.Lab3
 
             GL.EnableVertexAttribArray(vPositionLocation);
             GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(vNormalLocation);
+            GL.VertexAttribPointer(vNormalLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
 
             GL.BindVertexArray(0);
 
@@ -114,16 +117,27 @@ namespace Labs.Lab3
         {
             base.OnKeyPress(e);
             if (e.KeyChar == 'w') {
-                mView = mView * Matrix4.CreateTranslation(0.0f, 0.0f, 0.05f);
-                int uView = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
-                GL.UniformMatrix4(uView, true, ref mView);
+                MoveCamera(Matrix4.CreateTranslation(0.0f, 0.0f, 0.05f));
             }
             if (e.KeyChar == 'a')
             {
-                mView = mView * Matrix4.CreateRotationY(-0.025f);
-                int uView = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
-                GL.UniformMatrix4(uView, true, ref mView);            
+                MoveCamera(Matrix4.CreateRotationY(-0.025f));
             }
+            if (e.KeyChar == 's')
+            {
+                MoveCamera(Matrix4.CreateTranslation(0.0f, 0.0f, -0.05f));
+            }
+            if (e.KeyChar == 'd')
+            {
+                MoveCamera(Matrix4.CreateRotationY(0.025f));
+            }
+        }
+
+        protected void MoveCamera(Matrix4 pMatrix)
+        {
+            mView = mView * pMatrix;
+            int uView = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
+            GL.UniformMatrix4(uView, true, ref mView);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
