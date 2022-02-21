@@ -40,6 +40,11 @@ namespace Labs.Lab3
             GL.UseProgram(mShader.ShaderProgramID);
             int vPositionLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vPosition");
             int vNormalLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vNormal");
+            int uLightDirectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uLightDirection");
+
+            Vector3 normalisedLightDirection, lightDirection = new Vector3(-1, -1, -1);
+            Vector3.Normalize(ref lightDirection, out normalisedLightDirection);
+            GL.Uniform3(uLightDirectionLocation, normalisedLightDirection);
 
             GL.GenVertexArrays(mVAO_IDs.Length, mVAO_IDs);
             GL.GenBuffers(mVBO_IDs.Length, mVBO_IDs);
@@ -62,6 +67,8 @@ namespace Labs.Lab3
 
             GL.EnableVertexAttribArray(vPositionLocation);
             GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(vNormalLocation);
+            GL.VertexAttribPointer(vNormalLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
 
             mSphereModelUtility = ModelUtility.LoadModel(@"Utility/Models/sphere.bin"); 
 
@@ -85,8 +92,9 @@ namespace Labs.Lab3
 
             GL.EnableVertexAttribArray(vPositionLocation);
             GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+
             GL.EnableVertexAttribArray(vNormalLocation);
-            GL.VertexAttribPointer(vNormalLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+            GL.VertexAttribPointer(vNormalLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
 
             GL.BindVertexArray(0);
 
@@ -121,7 +129,11 @@ namespace Labs.Lab3
             }
             if (e.KeyChar == 'a')
             {
-                MoveCamera(Matrix4.CreateRotationY(-0.025f));
+                Vector3 t = mGroundModel.ExtractTranslation();
+                Matrix4 translation = Matrix4.CreateTranslation(t);
+                Matrix4 inverseTranslation = Matrix4.CreateTranslation(-t);
+                mGroundModel = mGroundModel * inverseTranslation * Matrix4.CreateRotationY(-0.025f) *
+                translation;
             }
             if (e.KeyChar == 's')
             {
@@ -129,7 +141,27 @@ namespace Labs.Lab3
             }
             if (e.KeyChar == 'd')
             {
-                MoveCamera(Matrix4.CreateRotationY(0.025f));
+                Vector3 t = mGroundModel.ExtractTranslation();
+                Matrix4 translation = Matrix4.CreateTranslation(t);
+                Matrix4 inverseTranslation = Matrix4.CreateTranslation(-t);
+                mGroundModel = mGroundModel * inverseTranslation * Matrix4.CreateRotationY(0.025f) *
+                translation;
+            }
+            if (e.KeyChar == 'c')
+            {
+                Vector3 t = mSphereModel.ExtractTranslation();
+                Matrix4 translation = Matrix4.CreateTranslation(t);
+                Matrix4 inverseTranslation = Matrix4.CreateTranslation(-t);
+                mSphereModel = mSphereModel * inverseTranslation * Matrix4.CreateRotationY(0.025f) *
+                translation;
+            }
+            if (e.KeyChar == 'v')
+            {
+                Vector3 t = mSphereModel.ExtractTranslation();
+                Matrix4 translation = Matrix4.CreateTranslation(t);
+                Matrix4 inverseTranslation = Matrix4.CreateTranslation(-t);
+                mSphereModel = mSphereModel * inverseTranslation * Matrix4.CreateRotationY(-0.025f) *
+                translation;
             }
         }
 
