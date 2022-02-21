@@ -95,24 +95,39 @@ namespace Labs.Lab2
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             int uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
-            Matrix4 m1 = Matrix4.CreateTranslation(-1f, 0, 0);
-            Matrix4 result = m1;
+            Matrix4 m1 = Matrix4.CreateTranslation(0, 0, 0);
+            m1 = m1 * Matrix4.CreateScale(0.2f);
 
-            GL.UniformMatrix4(uModelLocation, true, ref result);
+            for (int i = 0; i < 10; i++)
+            {
+                GL.UniformMatrix4(uModelLocation, true, ref m1);
+                GL.BindVertexArray(mVAO_ID);
+                GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+                GL.BindVertexArray(0);
+                m1 = Matrix4.CreateTranslation(i, 0, 0);
+                m1 = m1 * Matrix4.CreateScale(0.2f);
 
-            GL.BindVertexArray(mVAO_ID);
-            GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+                for (int j = 0; j < 10; j++)
+                {
+                    GL.UniformMatrix4(uModelLocation, true, ref m1);
+                    GL.BindVertexArray(mVAO_ID);
+                    GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+                    GL.BindVertexArray(0);
+                    m1 = Matrix4.CreateTranslation(j, i, 0);
+                    m1 = m1 * Matrix4.CreateScale(0.2f);
 
-            uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
-            m1 = Matrix4.CreateTranslation(1f, 0, 0);
-            result = m1;
+                    for (int k = 0; k < 10; k++)
+                    {
+                        GL.UniformMatrix4(uModelLocation, true, ref m1);
+                        GL.BindVertexArray(mVAO_ID);
+                        GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+                        GL.BindVertexArray(0);
+                        m1 = Matrix4.CreateTranslation(j, i, k);
+                        m1 = m1 * Matrix4.CreateScale(0.2f);
+                    }
+                }
+            }
 
-            GL.UniformMatrix4(uModelLocation, true, ref result);
-
-            GL.BindVertexArray(mVAO_ID);
-            GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
-
-            GL.BindVertexArray(0);
             this.SwapBuffers();
         }
 
@@ -158,6 +173,16 @@ namespace Labs.Lab2
             else if (e.KeyChar == 'e')
             {
                 mView = mView * Matrix4.CreateRotationY(-0.1f);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'r')
+            {
+                mView = mView * Matrix4.CreateTranslation(0, 0.1f, 0);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'f')
+            {
+                mView = mView * Matrix4.CreateTranslation(0, -0.1f, 0);
                 MoveCamera();
             }
         }
