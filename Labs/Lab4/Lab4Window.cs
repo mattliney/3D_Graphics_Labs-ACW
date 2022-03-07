@@ -3,6 +3,8 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace Labs.Lab4
 {
@@ -27,26 +29,58 @@ namespace Labs.Lab4
         private int mVAO_ID;
         private ShaderUtility mShader;
 
+        private int mTexture_ID;
+
         protected override void OnLoad(EventArgs e)
         {
+            string filepath = @"C:\Users\638298\Source\Repos\3D_Graphics_Labs-ACW\Labs\Lab4\texture.jpg";
+            if (System.IO.File.Exists(filepath))
+            {
+                Bitmap TextureBitmap = new Bitmap(filepath);
+                BitmapData TextureData = TextureBitmap.LockBits(
+                new System.Drawing.Rectangle(0, 0, TextureBitmap.Width,
+                TextureBitmap.Height), ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.GenTextures(1, out mTexture_ID);
+                GL.BindTexture(TextureTarget.Texture2D, mTexture_ID);
+
+                GL.TexImage2D(TextureTarget.Texture2D,
+                0, PixelInternalFormat.Rgba, TextureData.Width, TextureData.Height,
+                0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
+                PixelType.UnsignedByte, TextureData.Scan0);
+
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+                (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+                (int)TextureMagFilter.Linear);
+
+                TextureBitmap.UnlockBits(TextureData);
+            }
+            else
+            {
+                throw new Exception("Could not find file " + filepath);
+            }
+
             // Set some GL state
             GL.ClearColor(Color4.Firebrick);
 
-            float[] vertices = {-0.5f, -0.5f,
-                                -0.25f, -0.5f,
-                                0.0f, -0.5f,
-                                0.25f, -0.5f,
-                                0.5f, -0.5f,
-                                -0.5f, 0.0f,
-                                -0.25f, 0.0f,
-                                0.0f, 0.0f,
-                                0.25f, 0.0f,
-                                0.5f, 0.0f,
-                               -0.5f, 0.5f,
-                                -0.25f, 0.5f,
-                                0.0f, 0.5f,
-                                0.25f, 0.5f,
-                                0.5f, 0.5f
+            float[] vertices = {-0.5f, -0.5f, 1f, 1f,
+                                -0.25f, -0.5f, 1f, 1f,
+                                0.0f, -0.5f, 1f, 1f,
+                                0.25f, -0.5f, 1f, 1f,
+                                0.5f, -0.5f, 1f, 1f,
+                                -0.5f, 0.0f, 1f, 1f,
+                                -0.25f, 0.0f, 1f, 1f,
+                                0.0f, 0.0f, 0.7f, 0.7f,
+                                0.25f, 0.0f, 0.8f, 0.8f,
+                                0.5f, 0.0f, 0.9f, 0.9f,
+                               -0.5f, 0.5f, 0.1f, 0.1f,
+                                -0.25f, 0.5f, 0.1f, 0.1f,
+                                0.0f, 0.5f, 0.1f, 0.1f,
+                                0.25f, 0.5f, 0.1f, 0.1f,
+                                0.5f, 0.5f, 0.1f, 0.1f
                                 };
 
             uint[] indices = { 5, 0, 1,
@@ -95,8 +129,16 @@ namespace Labs.Lab4
                 throw new ApplicationException("Index data not loaded onto graphics card correctly");
             }
 
+            int vTexCoordsLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vTexCoords");
+
+            int uTextureSamplerLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uTextureSampler");
+            GL.Uniform1(uTextureSamplerLocation, 0);
+
             GL.EnableVertexAttribArray(vPositionLocation);
-            GL.VertexAttribPointer(vPositionLocation, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
+            GL.VertexAttribPointer(vPositionLocation, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
+
+            GL.EnableVertexAttribArray(vTexCoordsLocation);
+            GL.VertexAttribPointer(vTexCoordsLocation, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 2 * sizeof(float));
 
             GL.BindVertexArray(0);
 

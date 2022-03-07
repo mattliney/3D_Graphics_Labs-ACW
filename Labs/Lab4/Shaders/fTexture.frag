@@ -1,8 +1,12 @@
-﻿#version 330
-
-out vec4 FragColour;
-
-void main()
-{
-	FragColour = vec4(1,1,1,1);
-}
+﻿#version 330 
+ 
+uniform sampler2D uTextureSampler; 
+ 
+in vec2 oTexCoords; 
+ 
+out vec4 FragColour; 
+ 
+void main() 
+{ 
+ FragColour = texture(uTextureSampler, oTexCoords); 
+} 
