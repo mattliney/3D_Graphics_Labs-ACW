@@ -25,15 +25,15 @@ namespace Labs.ACW
         {
         }
 
-        private int[] mVBO_IDs = new int[2];
-        private int mVAO_ID;
+        private int[] mVBO_IDs = new int[4]; //Add 2 more of these for each element
+        private int[] mVAO_ID = new int[2]; //Add more of these for each element 
         private ModelUtility mModel;
         private ShaderUtility mShader;
         private Matrix4 mView;
 
         protected override void OnLoad(EventArgs e)
         {
-            mView = Matrix4.CreateTranslation(0, 0, -2);
+            mView = Matrix4.CreateTranslation(0, 0, -1);
 
             GL.ClearColor(Color4.DodgerBlue);
             GL.Enable(EnableCap.DepthTest);
@@ -45,10 +45,20 @@ namespace Labs.ACW
             int vPositionLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vPosition");
             int vColourLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vColour");
 
-            mVAO_ID = GL.GenVertexArray();
-            GL.GenBuffers(mVBO_IDs.Length, mVBO_IDs);
+            //Vertices and Indices
 
-            GL.BindVertexArray(mVAO_ID);
+            float[] verticesSquare = new float[] { -1f, 0f, 0f,
+                                                   -1f, 1f, 0f,
+                                                   1f, 1f, 0.2f,
+                                                   0.8f, 0.6f, 0.2f};
+
+            uint[] indicesSquare = new uint[] { 0, 1, 2 };
+
+            GL.GenBuffers(mVBO_IDs.Length, mVBO_IDs);
+            GL.GenVertexArrays(mVAO_ID.Length, mVAO_ID);
+
+            //Model
+            GL.BindVertexArray(mVAO_ID[0]);
             GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_IDs[0]);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(mModel.Vertices.Length * sizeof(float)), mModel.Vertices, BufferUsageHint.StaticDraw);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_IDs[1]);
@@ -72,9 +82,20 @@ namespace Labs.ACW
             GL.EnableVertexAttribArray(vColourLocation);
             GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
-            GL.BindVertexArray(0);
+            //Primitive
+            GL.BindVertexArray(mVAO_ID[1]);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_IDs[2]);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(verticesSquare.Length * sizeof(float)), verticesSquare, BufferUsageHint.StaticDraw);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_IDs[3]);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indicesSquare.Length * sizeof(int)), indicesSquare, BufferUsageHint.StaticDraw);
 
-            Vector3 eye = new Vector3(0.0f, 0.5f, -4f);
+            GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+            GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(vColourLocation);
+            GL.EnableVertexAttribArray(vPositionLocation);
+
+
+            Vector3 eye = new Vector3(0.0f, 0.5f, -1f);
             Vector3 lookAt = new Vector3(0, 0, 0);
             Vector3 up = new Vector3(0, 1, 0);
             mView = Matrix4.LookAt(eye, lookAt, up);
@@ -114,8 +135,12 @@ namespace Labs.ACW
             m1 = m1 * Matrix4.CreateScale(0.2f);
 
             GL.UniformMatrix4(uModelLocation, true, ref m1);
-            GL.BindVertexArray(mVAO_ID);
-            GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.BindVertexArray(mVAO_ID[0]);
+            //GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+
+            GL.BindVertexArray(mVAO_ID[1]);
+            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+
             GL.BindVertexArray(0);
 
             this.SwapBuffers();
@@ -127,7 +152,8 @@ namespace Labs.ACW
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             GL.BindVertexArray(0);
             GL.DeleteBuffers(mVBO_IDs.Length, mVBO_IDs);
-            GL.DeleteVertexArray(mVAO_ID);
+            GL.DeleteVertexArray(mVAO_ID[0]);
+            GL.DeleteVertexArray(mVAO_ID[1]);
             mShader.Delete();
             base.OnUnload(e);
         }
