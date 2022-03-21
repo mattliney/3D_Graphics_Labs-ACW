@@ -113,35 +113,12 @@ namespace Labs.ACW
             Matrix4 m1 = Matrix4.CreateTranslation(0, 0, 0);
             m1 = m1 * Matrix4.CreateScale(0.2f);
 
-            for (int i = 0; i < 10; i++)
-            {
-                GL.UniformMatrix4(uModelLocation, true, ref m1);
-                GL.BindVertexArray(mVAO_ID);
-                GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
-                GL.BindVertexArray(0);
-                m1 = Matrix4.CreateTranslation(i, 0, 0);
-                m1 = m1 * Matrix4.CreateScale(0.2f);
-
-                for (int j = 0; j < 10; j++)
-                {
-                    GL.UniformMatrix4(uModelLocation, true, ref m1);
-                    GL.BindVertexArray(mVAO_ID);
-                    GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
-                    GL.BindVertexArray(0);
-                    m1 = Matrix4.CreateTranslation(j, i, 0);
-                    m1 = m1 * Matrix4.CreateScale(0.2f);
-
-                    for (int k = 0; k < 10; k++)
-                    {
-                        GL.UniformMatrix4(uModelLocation, true, ref m1);
-                        GL.BindVertexArray(mVAO_ID);
-                        GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
-                        GL.BindVertexArray(0);
-                        m1 = Matrix4.CreateTranslation(j, i, k);
-                        m1 = m1 * Matrix4.CreateScale(0.2f);
-                    }
-                }
-            }
+            GL.UniformMatrix4(uModelLocation, true, ref m1);
+            GL.BindVertexArray(mVAO_ID);
+            GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.BindVertexArray(0);
+            m1 = Matrix4.CreateTranslation(0, 0, 0);
+            m1 = m1 * Matrix4.CreateScale(0.2f);
 
             this.SwapBuffers();
         }
