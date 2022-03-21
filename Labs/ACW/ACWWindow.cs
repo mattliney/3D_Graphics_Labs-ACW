@@ -40,7 +40,7 @@ namespace Labs.ACW
             GL.Enable(EnableCap.CullFace);
 
             mModel = ModelUtility.LoadModel(@"Utility/Models/model.bin");
-            mShader = new ShaderUtility(@"Lab2/Shaders/vLab22.vert", @"Lab2/Shaders/fSimple.frag");
+            mShader = new ShaderUtility(@"ACW/Shaders/myVert.vert", @"ACW/Shaders/myFrag.frag");
             GL.UseProgram(mShader.ShaderProgramID);
             int vPositionLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vPosition");
             int vColourLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vColour");
@@ -117,8 +117,6 @@ namespace Labs.ACW
             GL.BindVertexArray(mVAO_ID);
             GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
             GL.BindVertexArray(0);
-            m1 = Matrix4.CreateTranslation(0, 0, 0);
-            m1 = m1 * Matrix4.CreateScale(0.2f);
 
             this.SwapBuffers();
         }
