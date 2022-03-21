@@ -47,17 +47,11 @@ namespace Labs.ACW
 
             //Vertices and Indices
 
-            float[] verticesSquare = new float[] { -1f, 0f, 0f,
-                                                   -1f, 1f, 0f,
-                                                   1f, 1f, 0.2f,
-                                                   0.8f, 0.6f, 0.2f};
-
-            uint[] indicesSquare = new uint[] { 0, 1, 2 };
-
             GL.GenBuffers(mVBO_IDs.Length, mVBO_IDs);
             GL.GenVertexArrays(mVAO_ID.Length, mVAO_ID);
 
             //Model
+
             GL.BindVertexArray(mVAO_ID[0]);
             GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_IDs[0]);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(mModel.Vertices.Length * sizeof(float)), mModel.Vertices, BufferUsageHint.StaticDraw);
@@ -83,17 +77,6 @@ namespace Labs.ACW
             GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
             //Primitive
-            GL.BindVertexArray(mVAO_ID[1]);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_IDs[2]);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(verticesSquare.Length * sizeof(float)), verticesSquare, BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_IDs[3]);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indicesSquare.Length * sizeof(int)), indicesSquare, BufferUsageHint.StaticDraw);
-
-            GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
-            GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(vColourLocation);
-            GL.EnableVertexAttribArray(vPositionLocation);
-
 
             Vector3 eye = new Vector3(0.0f, 0.5f, -1f);
             Vector3 lookAt = new Vector3(0, 0, 0);
@@ -136,10 +119,7 @@ namespace Labs.ACW
 
             GL.UniformMatrix4(uModelLocation, true, ref m1);
             GL.BindVertexArray(mVAO_ID[0]);
-            //GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
-
-            GL.BindVertexArray(mVAO_ID[1]);
-            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
 
             GL.BindVertexArray(0);
 
@@ -153,7 +133,6 @@ namespace Labs.ACW
             GL.BindVertexArray(0);
             GL.DeleteBuffers(mVBO_IDs.Length, mVBO_IDs);
             GL.DeleteVertexArray(mVAO_ID[0]);
-            GL.DeleteVertexArray(mVAO_ID[1]);
             mShader.Delete();
             base.OnUnload(e);
         }
