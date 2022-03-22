@@ -25,8 +25,8 @@ namespace Labs.ACW
         {
         }
 
-        private int[] mVBO_ID = new int[4]; //Add 2 more of these for each element
-        private int[] mVAO_ID = new int[2]; //Add more of these for each element 
+        private int[] mVBO_ID = new int[6]; //Add 2 more of these for each element
+        private int[] mVAO_ID = new int[3]; //Add more of these for each element 
         private ModelUtility mModel;
         private ShaderUtility mShader;
         private Matrix4 mView;
@@ -49,13 +49,42 @@ namespace Labs.ACW
 
             //Vertices and Indices
 
-            float[] vertices = new float[] { -3f, 0f, -3f,
+            float[] floorVertices = new float[] { -3f, 0f, -3f,
                                              -3f, 0f, 3f,
                                               3f, 0f, 3f,
                                               3f, 0f, -3f};
 
-            uint[] indices = new uint[] { 0, 1, 2,
+            uint[] floorIndices = new uint[] { 0, 1, 2,
                                           0, 2, 3};
+
+            float[] cubeVertices = new float[] { -1f, 1f, 0f, //0
+                                                 -1f, -1f, 0f, //1
+                                                 1f, -1f, 0f, //2
+                                                 1f, 1f, 0f, //3
+            
+                                                 -1f, 1f, -2f, //4
+                                                 -1f, -1f, -2f, //5
+            
+                                                  1f, 1f, -2f, //6
+                                                  1f, -1f, -2f}; //7
+
+            uint[] cubeIndices = new uint[] { 0, 1, 2, 
+                                              0, 2, 3,
+            
+                                              0, 5, 1,
+                                              0, 4, 5,
+                
+                                              2, 7, 6,
+                                              2, 6, 3,
+            
+                                              6, 7, 5,
+                                              6, 5, 4,
+            
+                                              0, 3, 6,
+                                              6, 4, 0,
+            
+                                              1, 7, 2,
+                                              1, 5, 7};
 
             GL.GenBuffers(mVBO_ID.Length, mVBO_ID);
             GL.GenVertexArrays(mVAO_ID.Length, mVAO_ID);
@@ -90,14 +119,29 @@ namespace Labs.ACW
 
             GL.BindVertexArray(mVAO_ID[1]);
             GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_ID[2]);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vertices.Length * sizeof(float)), vertices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(floorVertices.Length * sizeof(float)), floorVertices, BufferUsageHint.StaticDraw);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_ID[3]);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indices.Length * sizeof(int)), indices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(floorIndices.Length * sizeof(int)), floorIndices, BufferUsageHint.StaticDraw);
 
             GL.EnableVertexAttribArray(vPositionLocation);
             GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false,3 * sizeof(float), 0);
             GL.EnableVertexAttribArray(vColourLocation);
             GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+            //Cube
+
+            GL.BindVertexArray(mVAO_ID[2]);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_ID[4]);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(cubeVertices.Length * sizeof(float)), cubeVertices, BufferUsageHint.StaticDraw);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_ID[5]);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(cubeIndices.Length * sizeof(int)), cubeIndices, BufferUsageHint.StaticDraw);
+
+            GL.EnableVertexAttribArray(vPositionLocation);
+            GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(vColourLocation);
+            GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+            //Camera
 
             int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
             GL.UniformMatrix4(uViewLocation, true, ref mView);
@@ -194,7 +238,6 @@ namespace Labs.ACW
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             int uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
-
             Matrix4 newMatrix = mModelMatrix * Matrix4.CreateTranslation(0,-0.5f,0);
             GL.UniformMatrix4(uModelLocation, true, ref newMatrix);
 
@@ -203,9 +246,13 @@ namespace Labs.ACW
 
             Matrix4 mat = Matrix4.CreateTranslation(0, -1f, -1f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
-
             GL.BindVertexArray(mVAO_ID[1]);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+
+            mat = Matrix4.CreateTranslation(2f, 0f, 0f);
+            GL.UniformMatrix4(uModelLocation, true, ref mat);
+            GL.BindVertexArray(mVAO_ID[2]);
+            GL.DrawElements(PrimitiveType.Triangles, 48, DrawElementsType.UnsignedInt, 0);
 
             GL.BindVertexArray(0);
 
