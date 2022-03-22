@@ -25,11 +25,13 @@ namespace Labs.ACW
         {
         }
 
-        private int[] mVBO_IDs = new int[4]; //Add 2 more of these for each element
+        private int[] mVBO_ID = new int[4]; //Add 2 more of these for each element
         private int[] mVAO_ID = new int[2]; //Add more of these for each element 
         private ModelUtility mModel;
         private ShaderUtility mShader;
         private Matrix4 mView;
+        private Matrix4 mFixedCam;
+        private Matrix4 mModelMatrix = Matrix4.CreateScale(0.5f);
 
         protected override void OnLoad(EventArgs e)
         {
@@ -47,15 +49,23 @@ namespace Labs.ACW
 
             //Vertices and Indices
 
-            GL.GenBuffers(mVBO_IDs.Length, mVBO_IDs);
+            float[] vertices = new float[] { -3f, 0f, -3f,
+                                             -3f, 0f, 3f,
+                                              3f, 0f, 3f,
+                                              3f, 0f, -3f};
+
+            uint[] indices = new uint[] { 0, 1, 2,
+                                          0, 2, 3};
+
+            GL.GenBuffers(mVBO_ID.Length, mVBO_ID);
             GL.GenVertexArrays(mVAO_ID.Length, mVAO_ID);
 
             //Model
 
             GL.BindVertexArray(mVAO_ID[0]);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_IDs[0]);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_ID[0]);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(mModel.Vertices.Length * sizeof(float)), mModel.Vertices, BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_IDs[1]);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_ID[1]);
             GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(mModel.Indices.Length * sizeof(float)), mModel.Indices, BufferUsageHint.StaticDraw);
 
             int size;
@@ -78,10 +88,16 @@ namespace Labs.ACW
 
             //Primitive
 
-            Vector3 eye = new Vector3(0.0f, 0.5f, -1f);
-            Vector3 lookAt = new Vector3(0, 0, 0);
-            Vector3 up = new Vector3(0, 1, 0);
-            mView = Matrix4.LookAt(eye, lookAt, up);
+            GL.BindVertexArray(mVAO_ID[1]);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_ID[2]);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vertices.Length * sizeof(float)), vertices, BufferUsageHint.StaticDraw);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_ID[3]);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indices.Length * sizeof(int)), indices, BufferUsageHint.StaticDraw);
+
+            GL.EnableVertexAttribArray(vPositionLocation);
+            GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false,3 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(vColourLocation);
+            GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
 
             int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
             GL.UniformMatrix4(uViewLocation, true, ref mView);
@@ -96,6 +112,70 @@ namespace Labs.ACW
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
             base.OnKeyPress(e);
+            if (e.KeyChar == 'a')
+            {
+                mView = mView * Matrix4.CreateTranslation(0.1f, 0, 0);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'd')
+            {
+                mView = mView * Matrix4.CreateTranslation(-0.1f, 0, 0);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'w')
+            {
+                mView = mView * Matrix4.CreateTranslation(0, -0.01f, 0.5f);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 's')
+            {
+                mView = mView * Matrix4.CreateTranslation(0, 0.01f, -0.5f);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'q')
+            {
+                mView = mView * Matrix4.CreateRotationY(0.1f);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'e')
+            {
+                mView = mView * Matrix4.CreateRotationY(-0.1f);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'r')
+            {
+                mView = mView * Matrix4.CreateTranslation(0, 0.1f, 0);
+                MoveCamera();
+            }
+            else if (e.KeyChar == 'f')
+            {
+                mView = mView * Matrix4.CreateTranslation(0, -0.1f, 0);
+                MoveCamera();
+            }
+            else if (e.KeyChar == '1')
+            {
+                Vector3 eye = new Vector3(0.0f, 0.5f, -4f);
+                Vector3 lookAt = new Vector3(0, 0, 0);
+                Vector3 up = new Vector3(0, 1, 0);
+                mFixedCam = Matrix4.LookAt(eye, lookAt, up);
+                int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
+                GL.UniformMatrix4(uViewLocation, true, ref mFixedCam);
+            }
+            else if (e.KeyChar == '2')
+            {
+                Vector3 eye = new Vector3(-3f, 0.5f, -4f);
+                Vector3 lookAt = new Vector3(0, 0, 0);
+                Vector3 up = new Vector3(0, 2, 0);
+                mFixedCam = Matrix4.LookAt(eye, lookAt, up);
+                int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
+                GL.UniformMatrix4(uViewLocation, true, ref mFixedCam);
+            }
+        }
+
+        private void MoveCamera()
+        {
+            int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
+            GL.UniformMatrix4(uViewLocation, true, ref mView);
         }
 
         protected override void OnResize(EventArgs e)
@@ -105,7 +185,7 @@ namespace Labs.ACW
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
- 	        base.OnUpdateFrame(e);
+            mModelMatrix = mModelMatrix * Matrix4.CreateRotationY(0.1f);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -114,12 +194,18 @@ namespace Labs.ACW
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             int uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
-            Matrix4 m1 = Matrix4.CreateTranslation(0, 0, 0);
-            m1 = m1 * Matrix4.CreateScale(0.2f);
 
-            GL.UniformMatrix4(uModelLocation, true, ref m1);
+            Matrix4 newMatrix = mModelMatrix * Matrix4.CreateTranslation(0,-0.5f,0);
+            GL.UniformMatrix4(uModelLocation, true, ref newMatrix);
+
             GL.BindVertexArray(mVAO_ID[0]);
             GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+
+            Matrix4 mat = Matrix4.CreateTranslation(0, -1f, -1f);
+            GL.UniformMatrix4(uModelLocation, true, ref mat);
+
+            GL.BindVertexArray(mVAO_ID[1]);
+            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
 
             GL.BindVertexArray(0);
 
@@ -131,8 +217,8 @@ namespace Labs.ACW
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             GL.BindVertexArray(0);
-            GL.DeleteBuffers(mVBO_IDs.Length, mVBO_IDs);
-            GL.DeleteVertexArray(mVAO_ID[0]);
+            GL.DeleteBuffers(mVBO_ID.Length, mVBO_ID);
+            GL.DeleteVertexArrays(mVAO_ID.Length, mVAO_ID);
             mShader.Delete();
             base.OnUnload(e);
         }
