@@ -33,7 +33,7 @@ namespace Labs.Lab4
 
         protected override void OnLoad(EventArgs e)
         {
-            string filepath = @"C:\Users\638298\Source\Repos\3D_Graphics_Labs-ACW\Labs\Lab4\texture.jpg";
+            string filepath = @"C:\Users\matth\Source\Repos\3D_Graphics_Labs-ACW\Labs\Lab4\texture.jpg";
             if (System.IO.File.Exists(filepath))
             {
                 Bitmap TextureBitmap = new Bitmap(filepath);

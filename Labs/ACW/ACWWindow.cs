@@ -25,13 +25,18 @@ namespace Labs.ACW
         {
         }
 
+        //Currently 3 elements: floor, model, cube
+
         private int[] mVBO_ID = new int[6]; //Add 2 more of these for each element
         private int[] mVAO_ID = new int[3]; //Add more of these for each element 
-        private ModelUtility mModel;
+        private int mVBOindex = 0;
+        private int mVAOindex = 0;
+
+        private ModelUtility mArmadillo;
         private ShaderUtility mShader;
         private Matrix4 mView;
         private Matrix4 mFixedCam;
-        private Matrix4 mModelMatrix = Matrix4.CreateScale(0.5f);
+        private Matrix4 mModelMatrix = Matrix4.CreateScale(0.25f);
 
         protected override void OnLoad(EventArgs e)
         {
@@ -41,7 +46,7 @@ namespace Labs.ACW
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
 
-            mModel = ModelUtility.LoadModel(@"Utility/Models/model.bin");
+            mArmadillo = ModelUtility.LoadModel(@"Utility/Models/model.bin");
             mShader = new ShaderUtility(@"ACW/Shaders/myVert.vert", @"ACW/Shaders/myFrag.frag");
             GL.UseProgram(mShader.ShaderProgramID);
             int vPositionLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vPosition");
@@ -54,21 +59,21 @@ namespace Labs.ACW
                                               3f, 0f, 3f,
                                               3f, 0f, -3f};
 
-            uint[] floorIndices = new uint[] { 0, 1, 2,
+            int[] floorIndices = new int[] { 0, 1, 2,
                                           0, 2, 3};
 
-            float[] cubeVertices = new float[] { -1f, 1f, 0f, //0
-                                                 -1f, -1f, 0f, //1
-                                                 1f, -1f, 0f, //2
-                                                 1f, 1f, 0f, //3
+            float[] cubeVertices = new float[] { -1f, 1f, 0f,
+                                                 -1f, -1f, 0f, 
+                                                 1f, -1f, 0f, 
+                                                 1f, 1f, 0f, 
             
-                                                 -1f, 1f, -2f, //4
-                                                 -1f, -1f, -2f, //5
+                                                 -1f, 1f, -2f, 
+                                                 -1f, -1f, -2f, 
             
-                                                  1f, 1f, -2f, //6
-                                                  1f, -1f, -2f}; //7
+                                                  1f, 1f, -2f,
+                                                  1f, -1f, -2f};
 
-            uint[] cubeIndices = new uint[] { 0, 1, 2, 
+            int[] cubeIndices = new int[] { 0, 1, 2, 
                                               0, 2, 3,
             
                                               0, 5, 1,
@@ -91,55 +96,18 @@ namespace Labs.ACW
 
             //Model
 
-            GL.BindVertexArray(mVAO_ID[0]);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_ID[0]);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(mModel.Vertices.Length * sizeof(float)), mModel.Vertices, BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_ID[1]);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(mModel.Indices.Length * sizeof(float)), mModel.Indices, BufferUsageHint.StaticDraw);
+            Element armadillo = new Element(mArmadillo.Vertices, mArmadillo.Indices, ref mVAOindex, ref mVBOindex, vColourLocation, vPositionLocation, true);
+            armadillo.Initialise(ref mVAO_ID, ref mVBO_ID);
 
-            int size;
-            GL.GetBufferParameter(BufferTarget.ArrayBuffer, BufferParameterName.BufferSize, out size);
-            if (mModel.Vertices.Length * sizeof(float) != size)
-            {
-                throw new ApplicationException("Vertex data not loaded onto graphics card correctly");
-            }
+            //Floor
 
-            GL.GetBufferParameter(BufferTarget.ElementArrayBuffer, BufferParameterName.BufferSize, out size);
-            if (mModel.Indices.Length * sizeof(float) != size)
-            {
-                throw new ApplicationException("Index data not loaded onto graphics card correctly");
-            }
-
-            GL.EnableVertexAttribArray(vPositionLocation);
-            GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(vColourLocation);
-            GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
-
-            //Primitive
-
-            GL.BindVertexArray(mVAO_ID[1]);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_ID[2]);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(floorVertices.Length * sizeof(float)), floorVertices, BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_ID[3]);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(floorIndices.Length * sizeof(int)), floorIndices, BufferUsageHint.StaticDraw);
-
-            GL.EnableVertexAttribArray(vPositionLocation);
-            GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false,3 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(vColourLocation);
-            GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            Element floor = new Element(floorVertices, floorIndices, ref mVAOindex, ref mVBOindex, vColourLocation, vPositionLocation, false);
+            floor.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Cube
 
-            GL.BindVertexArray(mVAO_ID[2]);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, mVBO_ID[4]);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(cubeVertices.Length * sizeof(float)), cubeVertices, BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mVBO_ID[5]);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(cubeIndices.Length * sizeof(int)), cubeIndices, BufferUsageHint.StaticDraw);
-
-            GL.EnableVertexAttribArray(vPositionLocation);
-            GL.VertexAttribPointer(vPositionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(vColourLocation);
-            GL.VertexAttribPointer(vColourLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            Element cube = new Element(cubeVertices, cubeIndices, ref mVAOindex, ref mVBOindex, vColourLocation, vPositionLocation, false);
+            cube.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Camera
 
@@ -198,7 +166,7 @@ namespace Labs.ACW
             }
             else if (e.KeyChar == '1')
             {
-                Vector3 eye = new Vector3(0.0f, 0.5f, -4f);
+                Vector3 eye = new Vector3(1f, 2f, 1.5f);
                 Vector3 lookAt = new Vector3(0, 0, 0);
                 Vector3 up = new Vector3(0, 1, 0);
                 mFixedCam = Matrix4.LookAt(eye, lookAt, up);
@@ -207,9 +175,9 @@ namespace Labs.ACW
             }
             else if (e.KeyChar == '2')
             {
-                Vector3 eye = new Vector3(-3f, 0.5f, -4f);
+                Vector3 eye = new Vector3(-1f, 2f, 1.5f);
                 Vector3 lookAt = new Vector3(0, 0, 0);
-                Vector3 up = new Vector3(0, 2, 0);
+                Vector3 up = new Vector3(0, 1, 0);
                 mFixedCam = Matrix4.LookAt(eye, lookAt, up);
                 int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
                 GL.UniformMatrix4(uViewLocation, true, ref mFixedCam);
@@ -238,21 +206,22 @@ namespace Labs.ACW
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             int uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
-            Matrix4 newMatrix = mModelMatrix * Matrix4.CreateTranslation(0,-0.5f,0);
+            Matrix4 newMatrix = mModelMatrix * Matrix4.CreateTranslation(0,-0.25f,0);
             GL.UniformMatrix4(uModelLocation, true, ref newMatrix);
 
             GL.BindVertexArray(mVAO_ID[0]);
-            GL.DrawElements(BeginMode.Triangles, mModel.Indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(BeginMode.Triangles, mArmadillo.Indices.Length, DrawElementsType.UnsignedInt, 0);
 
-            Matrix4 mat = Matrix4.CreateTranslation(0, -1f, -1f);
+            Matrix4 mat = Matrix4.CreateTranslation(0, -1f, -1f) * Matrix4.CreateScale(0.5f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[1]);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
 
-            mat = Matrix4.CreateTranslation(2f, 0f, 0f);
+            mat = Matrix4.CreateTranslation(2f, 0f, 0f) * Matrix4.CreateScale(0.5f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[2]);
             GL.DrawElements(PrimitiveType.Triangles, 48, DrawElementsType.UnsignedInt, 0);
+
 
             GL.BindVertexArray(0);
 
