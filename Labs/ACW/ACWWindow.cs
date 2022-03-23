@@ -36,7 +36,9 @@ namespace Labs.ACW
         private ShaderUtility mShader;
         private Matrix4 mView;
         private Matrix4 mFixedCam;
+
         private Matrix4 mModelMatrix = Matrix4.CreateScale(0.25f);
+        private Matrix4 mCubeMatrix = Matrix4.CreateScale(0.5f);
 
         protected override void OnLoad(EventArgs e)
         {
@@ -224,6 +226,8 @@ namespace Labs.ACW
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             mModelMatrix = mModelMatrix * Matrix4.CreateRotationY(0.1f);
+
+            mCubeMatrix = mCubeMatrix * Matrix4.CreateScale(0.99f);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -232,19 +236,18 @@ namespace Labs.ACW
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             int uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
-            Matrix4 newMatrix = mModelMatrix * Matrix4.CreateTranslation(0,-0.25f,0);
-            GL.UniformMatrix4(uModelLocation, true, ref newMatrix);
+            Matrix4 mat = mModelMatrix * Matrix4.CreateTranslation(0,-0.25f,0);
+            GL.UniformMatrix4(uModelLocation, true, ref mat);
 
             GL.BindVertexArray(mVAO_ID[0]);
             GL.DrawElements(BeginMode.Triangles, mArmadillo.Indices.Length, DrawElementsType.UnsignedInt, 0);
 
-            Matrix4 mat = Matrix4.CreateTranslation(0, -1f, -1f) * Matrix4.CreateScale(0.5f);
+            mat = Matrix4.CreateTranslation(0, -1f, -1f) * Matrix4.CreateScale(0.5f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[1]);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
 
-            mat = Matrix4.CreateTranslation(2f, 0f, 0f) * Matrix4.CreateScale(0.5f);
-            GL.UniformMatrix4(uModelLocation, true, ref mat);
+            GL.UniformMatrix4(uModelLocation, true, ref mCubeMatrix);
             GL.BindVertexArray(mVAO_ID[2]);
             GL.DrawElements(PrimitiveType.Triangles, 48, DrawElementsType.UnsignedInt, 0);
 
