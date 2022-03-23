@@ -25,10 +25,10 @@ namespace Labs.ACW
         {
         }
 
-        //Currently 3 elements: floor, model, cube
+        //Currently 3 elements: floor, model, cube, cone
 
-        private int[] mVBO_ID = new int[6]; //Add 2 more of these for each element
-        private int[] mVAO_ID = new int[3]; //Add more of these for each element 
+        private int[] mVBO_ID = new int[8]; //Add 2 more of these for each element
+        private int[] mVAO_ID = new int[4]; //Add more of these for each element 
         private int mVBOindex = 0;
         private int mVAOindex = 0;
 
@@ -91,6 +91,27 @@ namespace Labs.ACW
                                               1, 7, 2,
                                               1, 5, 7};
 
+            float[] coneVertices = new float[] { 0f, 2f, 0f,
+                                                 0.5f, 0, 1f,
+                                                 1f, 0f, 0.5f,
+            
+                                                 1f, 0f, -0.5f,
+                                                 0.5f, 0f, -1f,
+                                                 -0.5f, 0f, -1f,
+
+                                                 -1f, 0f, -0.5f,
+                                                 -1f, 0f, 0.5f,
+                                                 -0.5f, 0f, 1f};
+
+            int[] coneIndices = new int[] { 0, 1, 2,
+                                            0, 2, 3,
+                                            0, 3, 4,
+                                            0, 4, 5,
+                                            0, 5, 6,
+                                            0, 6, 7,
+                                            0, 7, 8,
+                                            0, 8, 1};
+
             GL.GenBuffers(mVBO_ID.Length, mVBO_ID);
             GL.GenVertexArrays(mVAO_ID.Length, mVAO_ID);
 
@@ -108,6 +129,11 @@ namespace Labs.ACW
 
             Element cube = new Element(cubeVertices, cubeIndices, ref mVAOindex, ref mVBOindex, vColourLocation, vPositionLocation, false);
             cube.Initialise(ref mVAO_ID, ref mVBO_ID);
+
+            //Cone
+
+            Element cone = new Element(coneVertices, coneIndices, ref mVAOindex, ref mVBOindex, vColourLocation, vPositionLocation, false);
+            cone.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Camera
 
@@ -221,6 +247,11 @@ namespace Labs.ACW
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[2]);
             GL.DrawElements(PrimitiveType.Triangles, 48, DrawElementsType.UnsignedInt, 0);
+
+            mat = Matrix4.CreateTranslation(-1.5f, -1f, 0f) * Matrix4.CreateScale(0.5f);
+            GL.UniformMatrix4(uModelLocation, true, ref mat);
+            GL.BindVertexArray(mVAO_ID[3]);
+            GL.DrawElements(PrimitiveType.TriangleFan, 24, DrawElementsType.UnsignedInt, 0);
 
 
             GL.BindVertexArray(0);
