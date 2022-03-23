@@ -38,7 +38,9 @@ namespace Labs.ACW
         private Matrix4 mFixedCam;
 
         private Matrix4 mModelMatrix = Matrix4.CreateScale(0.25f);
-        private Matrix4 mCubeMatrix = Matrix4.CreateScale(0.5f);
+        private Matrix4 mCubeMatrix = Matrix4.CreateScale(0.4f);
+
+        bool mIsScalingUp = true;
 
         protected override void OnLoad(EventArgs e)
         {
@@ -227,7 +229,25 @@ namespace Labs.ACW
         {
             mModelMatrix = mModelMatrix * Matrix4.CreateRotationY(0.1f);
 
-            mCubeMatrix = mCubeMatrix * Matrix4.CreateScale(0.99f);
+            Vector3 cubeScale = mCubeMatrix.ExtractScale();
+
+            if(cubeScale.Y < 0.3f)
+            {
+                mIsScalingUp = true;
+            }
+            else if(cubeScale.Y > 0.5f)
+            {
+                mIsScalingUp = false;
+            }
+
+            if(mIsScalingUp)
+            {
+                mCubeMatrix = mCubeMatrix * Matrix4.CreateScale(1.01f);
+            }
+            else if(!mIsScalingUp)
+            {
+                mCubeMatrix = mCubeMatrix * Matrix4.CreateScale(0.99f);
+            }
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -236,7 +256,7 @@ namespace Labs.ACW
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             int uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
-            Matrix4 mat = mModelMatrix * Matrix4.CreateTranslation(0,-0.25f,0);
+            Matrix4 mat = mModelMatrix * Matrix4.CreateTranslation(1f,-0.25f,0);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
 
             GL.BindVertexArray(mVAO_ID[0]);
@@ -246,12 +266,12 @@ namespace Labs.ACW
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[1]);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
-
+             
             GL.UniformMatrix4(uModelLocation, true, ref mCubeMatrix);
             GL.BindVertexArray(mVAO_ID[2]);
             GL.DrawElements(PrimitiveType.Triangles, 48, DrawElementsType.UnsignedInt, 0);
 
-            mat = Matrix4.CreateTranslation(-1.5f, -1f, 0f) * Matrix4.CreateScale(0.5f);
+            mat = Matrix4.CreateTranslation(-2f, -1f, 0f) * Matrix4.CreateScale(0.5f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[3]);
             GL.DrawElements(PrimitiveType.TriangleFan, 24, DrawElementsType.UnsignedInt, 0);
