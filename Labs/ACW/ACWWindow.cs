@@ -39,8 +39,10 @@ namespace Labs.ACW
 
         private Matrix4 mModelMatrix = Matrix4.CreateScale(0.25f);
         private Matrix4 mCubeMatrix = Matrix4.CreateTranslation(0,0,-2f);
+        private Matrix4 mConeMatrix = Matrix4.CreateTranslation(-3f, -1f, -3.5f);
 
         private bool mIsScalingUp = true;
+        private bool mIsMovingForward = true;
 
         private Vector3 mLightPosition = new Vector3(0, 0, 0);
 
@@ -278,6 +280,26 @@ namespace Labs.ACW
             {
                 mCubeMatrix = mCubeMatrix * Matrix4.CreateScale(0.99f);
             }
+
+            Vector3 conePos = mConeMatrix.ExtractTranslation();
+
+            if(conePos.Z < -2)
+            {
+                mIsMovingForward = true;
+            }
+            else if(conePos.Z > 1)
+            {
+                mIsMovingForward = false;
+            }
+
+            if(mIsMovingForward)
+            {
+                mConeMatrix = mConeMatrix * Matrix4.CreateTranslation(0, 0, 0.1f);
+            }
+            else if(!mIsMovingForward)
+            {
+                mConeMatrix = mConeMatrix * Matrix4.CreateTranslation(0, 0, -0.1f);
+            }
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -301,7 +323,7 @@ namespace Labs.ACW
             GL.BindVertexArray(mVAO_ID[2]);
             GL.DrawElements(PrimitiveType.Triangles, 48, DrawElementsType.UnsignedInt, 0);
 
-            mat = Matrix4.CreateTranslation(-3f, -1f, -3.5f) * Matrix4.CreateScale(0.3f);
+            mat = mConeMatrix * Matrix4.CreateScale(0.3f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[3]);
             GL.DrawElements(PrimitiveType.TriangleFan, 24, DrawElementsType.UnsignedInt, 0);
