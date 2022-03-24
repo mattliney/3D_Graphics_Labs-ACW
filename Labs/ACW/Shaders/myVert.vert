@@ -12,5 +12,5 @@ out vec4 oColour;
 void main() 
 { 
 	 gl_Position = vec4(vPosition, 1) * uModel * uView * uProjection; 
-	 oColour = vec4(vColour, 1); 
+	 oColour = vec4(vColour * 0.5 + 0.5, 1); 
 } 

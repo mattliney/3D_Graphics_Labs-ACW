@@ -67,9 +67,9 @@ namespace Labs.ACW
             else
             {
                 GL.EnableVertexAttribArray(mPositionLocation);
-                GL.VertexAttribPointer(mPositionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+                GL.VertexAttribPointer(mPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
                 GL.EnableVertexAttribArray(mColourLocation);
-                GL.VertexAttribPointer(mColourLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+                GL.VertexAttribPointer(mColourLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
             }
 
         }

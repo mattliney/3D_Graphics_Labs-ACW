@@ -38,7 +38,7 @@ namespace Labs.ACW
         private Matrix4 mFixedCam;
 
         private Matrix4 mModelMatrix = Matrix4.CreateScale(0.25f);
-        private Matrix4 mCubeMatrix = Matrix4.CreateScale(0.4f);
+        private Matrix4 mCubeMatrix = Matrix4.CreateTranslation(0,0,-2f);
 
         bool mIsScalingUp = true;
 
@@ -58,24 +58,24 @@ namespace Labs.ACW
 
             //Vertices and Indices
 
-            float[] floorVertices = new float[] { -3f, 0f, -3f,
-                                             -3f, 0f, 3f,
-                                              3f, 0f, 3f,
-                                              3f, 0f, -3f};
+            float[] floorVertices = new float[] { -3f, 0f, -3f, 0f, 1f, 0f,
+                                             -3f, 0f, 3f, 0f, 1f, 0f,
+                                              3f, 0f, 3f, 0f, 1f, 0f,
+                                              3f, 0f, -3f, 0f, 1f, 0f};
 
             int[] floorIndices = new int[] { 0, 1, 2,
                                           0, 2, 3};
 
-            float[] cubeVertices = new float[] { -1f, 1f, 0f,
-                                                 -1f, -1f, 0f, 
-                                                 1f, -1f, 0f, 
-                                                 1f, 1f, 0f, 
-            
-                                                 -1f, 1f, -2f, 
-                                                 -1f, -1f, -2f, 
-            
-                                                  1f, 1f, -2f,
-                                                  1f, -1f, -2f};
+            float[] cubeVertices = new float[] { -1f, 1f, 0f, 0f, 0f, 1f,
+                                                 -1f, -1f, 0f,  0f, 0f, 1f,
+                                                 1f, -1f, 0f,  0f, 1f, 1f,
+                                                 1f, 1f, 0f, 0f, 1f, 1f,
+
+                                                 -1f, 1f, -2f, -1f, 1f, 0f,
+                                                 -1f, -1f, -2f, -1f, 1f, 0f,
+
+                                                  1f, 1f, -2f, 1f, 0f, 0f,
+                                                  1f, -1f, -2f, 1f, 0f, 0f};
 
             int[] cubeIndices = new int[] { 0, 1, 2, 
                                               0, 2, 3,
@@ -95,17 +95,17 @@ namespace Labs.ACW
                                               1, 7, 2,
                                               1, 5, 7};
 
-            float[] coneVertices = new float[] { 0f, 2f, 0f,
-                                                 0.5f, 0, 1f,
-                                                 1f, 0f, 0.5f,
-            
-                                                 1f, 0f, -0.5f,
-                                                 0.5f, 0f, -1f,
-                                                 -0.5f, 0f, -1f,
+            float[] coneVertices = new float[] { 0f, 2f, 0f, 0f, 1f, 0f,
+                                                 0.5f, 0, 1f, 1f, 0f, 1f,
+                                                 1f, 0f, 0.5f, 1f, 0f, 1f,
 
-                                                 -1f, 0f, -0.5f,
-                                                 -1f, 0f, 0.5f,
-                                                 -0.5f, 0f, 1f};
+                                                 1f, 0f, -0.5f, 1f, 0f, -1f,
+                                                 0.5f, 0f, -1f, 1f, 0f, -1f,
+                                                 -0.5f, 0f, -1f, -1f, 0f, -1f,
+
+                                                 -1f, 0f, -0.5f, -1f, 0f, -1f,
+                                                 -1f, 0f, 0.5f, -1f, 0f, 1f,
+                                                 -0.5f, 0f, 1f, -1f, 0f, 1f};
 
             int[] coneIndices = new int[] { 0, 1, 2,
                                             0, 2, 3,
@@ -235,7 +235,7 @@ namespace Labs.ACW
             {
                 mIsScalingUp = true;
             }
-            else if(cubeScale.Y > 0.5f)
+            else if(cubeScale.Y > 0.4f)
             {
                 mIsScalingUp = false;
             }
@@ -256,7 +256,7 @@ namespace Labs.ACW
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             int uModelLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uModel");
-            Matrix4 mat = mModelMatrix * Matrix4.CreateTranslation(1f,-0.25f,0);
+            Matrix4 mat = mModelMatrix * Matrix4.CreateTranslation(1f,-0.25f,-1.5f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
 
             GL.BindVertexArray(mVAO_ID[0]);
@@ -271,7 +271,7 @@ namespace Labs.ACW
             GL.BindVertexArray(mVAO_ID[2]);
             GL.DrawElements(PrimitiveType.Triangles, 48, DrawElementsType.UnsignedInt, 0);
 
-            mat = Matrix4.CreateTranslation(-2f, -1f, 0f) * Matrix4.CreateScale(0.5f);
+            mat = Matrix4.CreateTranslation(-3f, -1f, -3.5f) * Matrix4.CreateScale(0.3f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[3]);
             GL.DrawElements(PrimitiveType.TriangleFan, 24, DrawElementsType.UnsignedInt, 0);
