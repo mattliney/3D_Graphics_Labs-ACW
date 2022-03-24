@@ -40,9 +40,9 @@ namespace Labs.ACW
         private Matrix4 mModelMatrix = Matrix4.CreateScale(0.25f);
         private Matrix4 mCubeMatrix = Matrix4.CreateTranslation(0,0,-2f);
 
-        private float mLightMover = 0.0f;
+        private bool mIsScalingUp = true;
 
-        bool mIsScalingUp = true;
+        private Vector3 mLightPosition = new Vector3(0, 0, 0);
 
         protected override void OnLoad(EventArgs e)
         {
@@ -155,6 +155,8 @@ namespace Labs.ACW
             Vector3.Normalize(ref lightDirection, out normalisedLightDirection);
             GL.Uniform3(uLightDirectionLocation, normalisedLightDirection);
 
+            MoveCamera(mView);
+
             base.OnLoad(e);
         }
 
@@ -164,42 +166,42 @@ namespace Labs.ACW
             if (e.KeyChar == 'a')
             {
                 mView = mView * Matrix4.CreateTranslation(0.1f, 0, 0);
-                MoveCamera();
+                MoveCamera(mView);
             }
             else if (e.KeyChar == 'd')
             {
                 mView = mView * Matrix4.CreateTranslation(-0.1f, 0, 0);
-                MoveCamera();
+                MoveCamera(mView);
             }
             else if (e.KeyChar == 'w')
             {
                 mView = mView * Matrix4.CreateTranslation(0, -0.01f, 0.5f);
-                MoveCamera();
+                MoveCamera(mView);
             }
             else if (e.KeyChar == 's')
             {
                 mView = mView * Matrix4.CreateTranslation(0, 0.01f, -0.5f);
-                MoveCamera();
+                MoveCamera(mView);
             }
             else if (e.KeyChar == 'q')
             {
                 mView = mView * Matrix4.CreateRotationY(0.1f);
-                MoveCamera();
+                MoveCamera(mView);
             }
             else if (e.KeyChar == 'e')
             {
                 mView = mView * Matrix4.CreateRotationY(-0.1f);
-                MoveCamera();
+                MoveCamera(mView);
             }
             else if (e.KeyChar == 'r')
             {
                 mView = mView * Matrix4.CreateTranslation(0, 0.1f, 0);
-                MoveCamera();
+                MoveCamera(mView);
             }
             else if (e.KeyChar == 'f')
             {
                 mView = mView * Matrix4.CreateTranslation(0, -0.1f, 0);
-                MoveCamera();
+                MoveCamera(mView);
             }
             else if (e.KeyChar == '1')
             {
@@ -207,8 +209,8 @@ namespace Labs.ACW
                 Vector3 lookAt = new Vector3(0, 0, 0);
                 Vector3 up = new Vector3(0, 1, 0);
                 mFixedCam = Matrix4.LookAt(eye, lookAt, up);
-                int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
-                GL.UniformMatrix4(uViewLocation, true, ref mFixedCam);
+
+                MoveCamera(mFixedCam);
             }
             else if (e.KeyChar == '2')
             {
@@ -216,15 +218,36 @@ namespace Labs.ACW
                 Vector3 lookAt = new Vector3(0, 0, 0);
                 Vector3 up = new Vector3(0, 1, 0);
                 mFixedCam = Matrix4.LookAt(eye, lookAt, up);
-                int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
-                GL.UniformMatrix4(uViewLocation, true, ref mFixedCam);
+
+                MoveCamera(mFixedCam);
+            }
+            else if (e.KeyChar == '3')
+            {
+                mLightPosition = new Vector3(-1,0,0);
+                MoveCamera(mView);
+            }
+            else if (e.KeyChar == '4')
+            {
+                mLightPosition = new Vector3(0, 0, 0);
+                MoveCamera(mView);
+            }
+            else if (e.KeyChar == '5')
+            {
+                mLightPosition = new Vector3(1, 0, 0);
+                MoveCamera(mView);
             }
         }
 
-        private void MoveCamera()
+        private void MoveCamera(Matrix4 pView)
         {
             int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
-            GL.UniformMatrix4(uViewLocation, true, ref mView);
+            GL.UniformMatrix4(uViewLocation, true, ref pView);
+
+            int uView = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
+            int uLightPosition = GL.GetUniformLocation(mShader.ShaderProgramID, "uLightPosition");
+            Vector4 lightPosition = Vector4.Transform(new Vector4(mLightPosition, 1), pView);
+            GL.Uniform4(uLightPosition, lightPosition);
+            GL.UniformMatrix4(uView, true, ref pView);
         }
 
         protected override void OnResize(EventArgs e)
@@ -255,13 +278,6 @@ namespace Labs.ACW
             {
                 mCubeMatrix = mCubeMatrix * Matrix4.CreateScale(0.99f);
             }
-
-
-            int uView = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
-            int uLightPosition = GL.GetUniformLocation(mShader.ShaderProgramID, "uLightPosition");
-            Vector4 lightPosition = Vector4.Transform(new Vector4(mLightMover, 0, 0, 1), mView);
-            GL.Uniform4(uLightPosition, lightPosition);
-            GL.UniformMatrix4(uView, true, ref mView);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
