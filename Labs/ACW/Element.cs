@@ -14,12 +14,12 @@ namespace Labs.ACW
         private int[] mIndices;
         private int mVAOindex;
         private int mVBOindex;
-        private int mColourLocation;
+        private int mNormalLocation;
         private int mPositionLocation;
 
         private bool mIsModel;
 
-        public Element(float[] pVertices, int[] pIndices, ref int pVAOindex, ref int pVBOindex, int pColour, int pPosition, bool pIsModel)
+        public Element(float[] pVertices, int[] pIndices, ref int pVAOindex, ref int pVBOindex, int pNormal, int pPosition, bool pIsModel)
         {
             mVertices = pVertices;
             mIndices = pIndices;
@@ -30,7 +30,7 @@ namespace Labs.ACW
             mVBOindex = pVBOindex;
             pVBOindex = pVBOindex + 2;
 
-            mColourLocation = pColour;
+            mNormalLocation = pNormal;
             mPositionLocation = pPosition;
 
             mIsModel = pIsModel;
@@ -61,15 +61,15 @@ namespace Labs.ACW
             {
                 GL.EnableVertexAttribArray(mPositionLocation);
                 GL.VertexAttribPointer(mPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
-                GL.EnableVertexAttribArray(mColourLocation);
-                GL.VertexAttribPointer(mColourLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+                GL.EnableVertexAttribArray(mNormalLocation);
+                GL.VertexAttribPointer(mNormalLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
             }
             else
             {
                 GL.EnableVertexAttribArray(mPositionLocation);
                 GL.VertexAttribPointer(mPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
-                GL.EnableVertexAttribArray(mColourLocation);
-                GL.VertexAttribPointer(mColourLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+                GL.EnableVertexAttribArray(mNormalLocation);
+                GL.VertexAttribPointer(mNormalLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
             }
 
         }

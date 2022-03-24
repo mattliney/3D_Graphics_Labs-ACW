@@ -40,6 +40,8 @@ namespace Labs.ACW
         private Matrix4 mModelMatrix = Matrix4.CreateScale(0.25f);
         private Matrix4 mCubeMatrix = Matrix4.CreateTranslation(0,0,-2f);
 
+        private float mLightMover = 0.0f;
+
         bool mIsScalingUp = true;
 
         protected override void OnLoad(EventArgs e)
@@ -54,14 +56,14 @@ namespace Labs.ACW
             mShader = new ShaderUtility(@"ACW/Shaders/myVert.vert", @"ACW/Shaders/myFrag.frag");
             GL.UseProgram(mShader.ShaderProgramID);
             int vPositionLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vPosition");
-            int vColourLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vColour");
+            int vNormalLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vNormal");
 
             //Vertices and Indices
 
-            float[] floorVertices = new float[] { -3f, 0f, -3f, 0f, 1f, 0f,
-                                             -3f, 0f, 3f, 0f, 1f, 0f,
-                                              3f, 0f, 3f, 0f, 1f, 0f,
-                                              3f, 0f, -3f, 0f, 1f, 0f};
+            float[] floorVertices = new float[] { -3f, 0f, -3f, 0, 1, 0,
+                                             -3f, 0f, 3f, 0, 1, 0,
+                                              3f, 0f, 3f, 0, 1, 0,
+                                              3f, 0f, -3f, 0, 1, 0};
 
             int[] floorIndices = new int[] { 0, 1, 2,
                                           0, 2, 3};
@@ -121,22 +123,22 @@ namespace Labs.ACW
 
             //Model
 
-            Element armadillo = new Element(mArmadillo.Vertices, mArmadillo.Indices, ref mVAOindex, ref mVBOindex, vColourLocation, vPositionLocation, true);
+            Element armadillo = new Element(mArmadillo.Vertices, mArmadillo.Indices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, true);
             armadillo.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Floor
 
-            Element floor = new Element(floorVertices, floorIndices, ref mVAOindex, ref mVBOindex, vColourLocation, vPositionLocation, false);
+            Element floor = new Element(floorVertices, floorIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false);
             floor.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Cube
 
-            Element cube = new Element(cubeVertices, cubeIndices, ref mVAOindex, ref mVBOindex, vColourLocation, vPositionLocation, false);
+            Element cube = new Element(cubeVertices, cubeIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false);
             cube.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Cone
 
-            Element cone = new Element(coneVertices, coneIndices, ref mVAOindex, ref mVBOindex, vColourLocation, vPositionLocation, false);
+            Element cone = new Element(coneVertices, coneIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false);
             cone.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Camera
@@ -147,6 +149,11 @@ namespace Labs.ACW
             int uProjectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uProjection");
             Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(1, (float)ClientRectangle.Width / ClientRectangle.Height, 0.5f, 5);
             GL.UniformMatrix4(uProjectionLocation, true, ref projection);
+
+            int uLightDirectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID,"uLightDirection");
+            Vector3 normalisedLightDirection, lightDirection = new Vector3(0,0,-2);
+            Vector3.Normalize(ref lightDirection, out normalisedLightDirection);
+            GL.Uniform3(uLightDirectionLocation, normalisedLightDirection);
 
             base.OnLoad(e);
         }
@@ -248,6 +255,13 @@ namespace Labs.ACW
             {
                 mCubeMatrix = mCubeMatrix * Matrix4.CreateScale(0.99f);
             }
+
+
+            int uView = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
+            int uLightPosition = GL.GetUniformLocation(mShader.ShaderProgramID, "uLightPosition");
+            Vector4 lightPosition = Vector4.Transform(new Vector4(mLightMover, 0, 0, 1), mView);
+            GL.Uniform4(uLightPosition, lightPosition);
+            GL.UniformMatrix4(uView, true, ref mView);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
