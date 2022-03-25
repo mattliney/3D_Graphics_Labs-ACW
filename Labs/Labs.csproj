@@ -115,7 +115,9 @@
     <Folder Include="Challenge\Shaders\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ACW\texture.jpg" />
+    <Content Include="ACW\texture.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Lab4\texture.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

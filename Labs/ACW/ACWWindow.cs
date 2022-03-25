@@ -54,7 +54,6 @@ namespace Labs.ACW
         protected override void OnLoad(EventArgs e)
         {
             LoadTexture();
-            mFreeCam = Matrix4.CreateTranslation(0, 0, -1);
 
             GL.ClearColor(Color4.Black);
             GL.Enable(EnableCap.DepthTest);
@@ -153,6 +152,8 @@ namespace Labs.ACW
             cone.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Camera
+
+            mFreeCam = Matrix4.CreateTranslation(0, 0, -1);
 
             int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
             GL.UniformMatrix4(uViewLocation, true, ref mFreeCam);
@@ -383,7 +384,7 @@ namespace Labs.ACW
 
         private void LoadTexture()
         {
-            string filepath = @"C:\Users\matth\Source\Repos\3D_Graphics_Labs-ACW\Labs\ACW\texture.jpg";
+            string filepath = @"ACW\texture.jpg";
             if (System.IO.File.Exists(filepath))
             {
                 mTextureBitmap = new Bitmap(filepath);
