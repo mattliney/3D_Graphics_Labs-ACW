@@ -34,8 +34,9 @@ namespace Labs.ACW
 
         private ModelUtility mArmadillo;
         private ShaderUtility mShader;
-        private Matrix4 mView;
+        private Matrix4 mFreeCam;
         private Matrix4 mFixedCam;
+        private Matrix4 mCurrentCam;
 
         private Matrix4 mModelMatrix = Matrix4.CreateScale(0.25f);
         private Matrix4 mCubeMatrix = Matrix4.CreateTranslation(0,0,-2f);
@@ -53,7 +54,7 @@ namespace Labs.ACW
         protected override void OnLoad(EventArgs e)
         {
             LoadTexture();
-            mView = Matrix4.CreateTranslation(0, 0, -1);
+            mFreeCam = Matrix4.CreateTranslation(0, 0, -1);
 
             GL.ClearColor(Color4.Black);
             GL.Enable(EnableCap.DepthTest);
@@ -154,7 +155,7 @@ namespace Labs.ACW
             //Camera
 
             int uViewLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uView");
-            GL.UniformMatrix4(uViewLocation, true, ref mView);
+            GL.UniformMatrix4(uViewLocation, true, ref mFreeCam);
 
             int uProjectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uProjection");
             Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(1, (float)ClientRectangle.Width / ClientRectangle.Height, 0.5f, 5);
@@ -165,7 +166,7 @@ namespace Labs.ACW
             Vector3.Normalize(ref lightDirection, out normalisedLightDirection);
             GL.Uniform3(uLightDirectionLocation, normalisedLightDirection);
 
-            MoveCamera(mView);
+            MoveCamera(mFreeCam);
 
             base.OnLoad(e);
         }
@@ -175,43 +176,51 @@ namespace Labs.ACW
             base.OnKeyPress(e);
             if (e.KeyChar == 'a')
             {
-                mView = mView * Matrix4.CreateTranslation(0.1f, 0, 0);
-                MoveCamera(mView);
+                mFreeCam = mFreeCam * Matrix4.CreateTranslation(0.1f, 0, 0);
+                mCurrentCam = mFreeCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == 'd')
             {
-                mView = mView * Matrix4.CreateTranslation(-0.1f, 0, 0);
-                MoveCamera(mView);
+                mFreeCam = mFreeCam * Matrix4.CreateTranslation(-0.1f, 0, 0);
+                mCurrentCam = mFreeCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == 'w')
             {
-                mView = mView * Matrix4.CreateTranslation(0, -0.01f, 0.5f);
-                MoveCamera(mView);
+                mFreeCam = mFreeCam * Matrix4.CreateTranslation(0, -0.01f, 0.5f);
+                mCurrentCam = mFreeCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == 's')
             {
-                mView = mView * Matrix4.CreateTranslation(0, 0.01f, -0.5f);
-                MoveCamera(mView);
+                mFreeCam = mFreeCam * Matrix4.CreateTranslation(0, 0.01f, -0.5f);
+                mCurrentCam = mFreeCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == 'q')
             {
-                mView = mView * Matrix4.CreateRotationY(0.1f);
-                MoveCamera(mView);
+                mFreeCam = mFreeCam * Matrix4.CreateRotationY(0.1f);
+                mCurrentCam = mFreeCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == 'e')
             {
-                mView = mView * Matrix4.CreateRotationY(-0.1f);
-                MoveCamera(mView);
+                mFreeCam = mFreeCam * Matrix4.CreateRotationY(-0.1f);
+                mCurrentCam = mFreeCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == 'r')
             {
-                mView = mView * Matrix4.CreateTranslation(0, 0.1f, 0);
-                MoveCamera(mView);
+                mFreeCam = mFreeCam * Matrix4.CreateTranslation(0, 0.1f, 0);
+                mCurrentCam = mFreeCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == 'f')
             {
-                mView = mView * Matrix4.CreateTranslation(0, -0.1f, 0);
-                MoveCamera(mView);
+                mFreeCam = mFreeCam * Matrix4.CreateTranslation(0, -0.1f, 0);
+                mCurrentCam = mFreeCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == '1')
             {
@@ -219,8 +228,9 @@ namespace Labs.ACW
                 Vector3 lookAt = new Vector3(0, 0, 0);
                 Vector3 up = new Vector3(0, 1, 0);
                 mFixedCam = Matrix4.LookAt(eye, lookAt, up);
-
-                MoveCamera(mFixedCam);
+                
+                mCurrentCam = mFixedCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == '2')
             {
@@ -229,22 +239,23 @@ namespace Labs.ACW
                 Vector3 up = new Vector3(0, 1, 0);
                 mFixedCam = Matrix4.LookAt(eye, lookAt, up);
 
-                MoveCamera(mFixedCam);
+                mCurrentCam = mFixedCam;
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == '3')
             {
                 mLightPosition = new Vector3(-1,0,0);
-                MoveCamera(mView);
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == '4')
             {
                 mLightPosition = new Vector3(0, 0, 0);
-                MoveCamera(mView);
+                MoveCamera(mCurrentCam);
             }
             else if (e.KeyChar == '5')
             {
                 mLightPosition = new Vector3(1, 0, 0);
-                MoveCamera(mView);
+                MoveCamera(mCurrentCam);
             }
         }
 
