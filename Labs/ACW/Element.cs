@@ -16,11 +16,12 @@ namespace Labs.ACW
         private int mVBOindex;
         private int mNormalLocation;
         private int mPositionLocation;
+        private int mTextureLocation;
 
         private bool mIsModel;
         private bool mHasTexture;
 
-        public Element(float[] pVertices, int[] pIndices, ref int pVAOindex, ref int pVBOindex, int pNormal, int pPosition, bool pIsModel, bool pHasTexture)
+        public Element(float[] pVertices, int[] pIndices, ref int pVAOindex, ref int pVBOindex, int pNormal, int pPosition, int pTexture, bool pIsModel, bool pHasTexture)
         {
             mVertices = pVertices;
             mIndices = pIndices;
@@ -33,6 +34,8 @@ namespace Labs.ACW
 
             mNormalLocation = pNormal;
             mPositionLocation = pPosition;
+
+            mTextureLocation = pTexture;
 
             mIsModel = pIsModel;
             mHasTexture = pHasTexture;
@@ -76,9 +79,11 @@ namespace Labs.ACW
             else
             {
                 GL.EnableVertexAttribArray(mPositionLocation);
-                GL.VertexAttribPointer(mPositionLocation, 3, VertexAttribPointerType.Float, false, 9 * sizeof(float), 0);
+                GL.VertexAttribPointer(mPositionLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
                 GL.EnableVertexAttribArray(mNormalLocation);
-                GL.VertexAttribPointer(mNormalLocation, 3, VertexAttribPointerType.Float, true, 9 * sizeof(float), 3 * sizeof(float));
+                GL.VertexAttribPointer(mNormalLocation, 3, VertexAttribPointerType.Float, true, 8 * sizeof(float), 3 * sizeof(float));
+                GL.EnableVertexAttribArray(mTextureLocation);
+                GL.VertexAttribPointer(mTextureLocation, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
             }
 
         }

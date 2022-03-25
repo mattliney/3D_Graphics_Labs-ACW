@@ -55,7 +55,7 @@ namespace Labs.ACW
             LoadTexture();
             mView = Matrix4.CreateTranslation(0, 0, -1);
 
-            GL.ClearColor(Color4.DodgerBlue);
+            GL.ClearColor(Color4.Black);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
 
@@ -64,13 +64,16 @@ namespace Labs.ACW
             GL.UseProgram(mShader.ShaderProgramID);
             int vPositionLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vPosition");
             int vNormalLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vNormal");
+            int vTextureLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vTexCoords");
+            int uTextureSamplerLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uTextureSampler");
+            GL.Uniform1(uTextureSamplerLocation, 0);
 
             //Vertices and Indices
 
-            float[] floorVertices = new float[] { -3f, 0f, -3f, 0, 1, 0, 0, 1, 0,
-                                             -3f, 0f, 3f, 0, 1, 0, 0, 1, 0,
-                                              3f, 0f, 3f, 0, 1, 0, 0, 1, 0,
-                                              3f, 0f, -3f, 0, 1, 0, 0, 1, 0};
+            float[] floorVertices = new float[] { -3f, 0f, -3f, 0, 1, 0, 0f, 0f,
+                                             -3f, 0f, 3f, 0, 1, 0, 0f, 1f,
+                                              3f, 0f, 3f, 0, 1, 0, 1f, 1f,
+                                              3f, 0f, -3f, 0, 1, 0, 1f, 0f};
 
             int[] floorIndices = new int[] { 0, 1, 2,
                                           0, 2, 3};
@@ -130,22 +133,22 @@ namespace Labs.ACW
 
             //Model
 
-            Element armadillo = new Element(mArmadillo.Vertices, mArmadillo.Indices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, true, false);
+            Element armadillo = new Element(mArmadillo.Vertices, mArmadillo.Indices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, vTextureLocation, true, false);
             armadillo.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Floor
 
-            Element floor = new Element(floorVertices, floorIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false, true);
+            Element floor = new Element(floorVertices, floorIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, vTextureLocation, false, true);
             floor.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Cube
 
-            Element cube = new Element(cubeVertices, cubeIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false, false);
+            Element cube = new Element(cubeVertices, cubeIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, vTextureLocation, false, false);
             cube.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Cone
 
-            Element cone = new Element(coneVertices, coneIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false, false);
+            Element cone = new Element(coneVertices, coneIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, vTextureLocation, false, false);
             cone.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Camera
@@ -357,6 +360,10 @@ namespace Labs.ACW
             GL.BindVertexArray(mVAO_ID[3]);
             GL.DrawElements(PrimitiveType.TriangleFan, 24, DrawElementsType.UnsignedInt, 0);
 
+            mat = Matrix4.CreateTranslation(0, -4f, -2f) * Matrix4.CreateScale(0.5f) * Matrix4.CreateRotationX(1.5708f);
+            GL.UniformMatrix4(uModelLocation, true, ref mat);
+            GL.BindVertexArray(mVAO_ID[1]);
+            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
 
             GL.BindVertexArray(0);
 
@@ -388,12 +395,13 @@ namespace Labs.ACW
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
                 (int)TextureMagFilter.Linear);
 
-                mTextureBitmap.UnlockBits(mTextureData);
+                mTextureBitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
             }
             else
             {
                 throw new Exception("Could not find file " + filepath);
             }
+
         }
         
         protected override void OnUnload(EventArgs e)
