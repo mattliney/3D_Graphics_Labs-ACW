@@ -44,10 +44,15 @@ namespace Labs.ACW
         private bool mIsScalingUp = true;
         private bool mIsMovingForward = true;
 
+        private int mTexture_ID;
+        private Bitmap mTextureBitmap;
+        private BitmapData mTextureData;
+
         private Vector3 mLightPosition = new Vector3(0, 0, 0);
 
         protected override void OnLoad(EventArgs e)
         {
+            LoadTexture();
             mView = Matrix4.CreateTranslation(0, 0, -1);
 
             GL.ClearColor(Color4.DodgerBlue);
@@ -62,10 +67,10 @@ namespace Labs.ACW
 
             //Vertices and Indices
 
-            float[] floorVertices = new float[] { -3f, 0f, -3f, 0, 1, 0,
-                                             -3f, 0f, 3f, 0, 1, 0,
-                                              3f, 0f, 3f, 0, 1, 0,
-                                              3f, 0f, -3f, 0, 1, 0};
+            float[] floorVertices = new float[] { -3f, 0f, -3f, 0, 1, 0, 0, 1, 0,
+                                             -3f, 0f, 3f, 0, 1, 0, 0, 1, 0,
+                                              3f, 0f, 3f, 0, 1, 0, 0, 1, 0,
+                                              3f, 0f, -3f, 0, 1, 0, 0, 1, 0};
 
             int[] floorIndices = new int[] { 0, 1, 2,
                                           0, 2, 3};
@@ -125,22 +130,22 @@ namespace Labs.ACW
 
             //Model
 
-            Element armadillo = new Element(mArmadillo.Vertices, mArmadillo.Indices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, true);
+            Element armadillo = new Element(mArmadillo.Vertices, mArmadillo.Indices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, true, false);
             armadillo.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Floor
 
-            Element floor = new Element(floorVertices, floorIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false);
+            Element floor = new Element(floorVertices, floorIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false, true);
             floor.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Cube
 
-            Element cube = new Element(cubeVertices, cubeIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false);
+            Element cube = new Element(cubeVertices, cubeIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false, false);
             cube.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Cone
 
-            Element cone = new Element(coneVertices, coneIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false);
+            Element cone = new Element(coneVertices, coneIndices, ref mVAOindex, ref mVBOindex, vNormalLocation, vPositionLocation, false, false);
             cone.Initialise(ref mVAO_ID, ref mVBO_ID);
 
             //Camera
@@ -216,7 +221,7 @@ namespace Labs.ACW
             }
             else if (e.KeyChar == '2')
             {
-                Vector3 eye = new Vector3(-1f, 2f, 1.5f);
+                Vector3 eye = new Vector3(-2f, 0f, 1.5f);
                 Vector3 lookAt = new Vector3(0, 0, 0);
                 Vector3 up = new Vector3(0, 1, 0);
                 mFixedCam = Matrix4.LookAt(eye, lookAt, up);
@@ -255,6 +260,30 @@ namespace Labs.ACW
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
+            GL.Viewport(this.ClientRectangle);
+            if (mShader != null)
+            {
+                int uProjectionLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uProjection");
+                float windowHeight = (float)this.ClientRectangle.Height;
+                float windowWidth = (float)this.ClientRectangle.Width;
+
+                if (windowHeight > windowWidth)
+                {
+                    if (windowWidth < 1) { windowWidth = 1; }
+
+                    float ratio = windowWidth / windowHeight;
+                    Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(1, ratio, 0.5f, 5);
+                    GL.UniformMatrix4(uProjectionLocation, true, ref projection);
+                }
+                else
+                {
+                    if (windowHeight < 1) { windowHeight = 1; }
+
+                    float ratio = windowWidth / windowHeight;
+                    Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(1, ratio, 0.5f, 5);
+                    GL.UniformMatrix4(uProjectionLocation, true, ref projection);
+                }
+            }
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
@@ -334,6 +363,39 @@ namespace Labs.ACW
             this.SwapBuffers();
         }
 
+        private void LoadTexture()
+        {
+            string filepath = @"C:\Users\matth\Source\Repos\3D_Graphics_Labs-ACW\Labs\ACW\texture.jpg";
+            if (System.IO.File.Exists(filepath))
+            {
+                mTextureBitmap = new Bitmap(filepath);
+                mTextureData = mTextureBitmap.LockBits(
+                new System.Drawing.Rectangle(0, 0, mTextureBitmap.Width,
+                mTextureBitmap.Height), ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.GenTextures(1, out mTexture_ID);
+                GL.BindTexture(TextureTarget.Texture2D, mTexture_ID);
+
+                GL.TexImage2D(TextureTarget.Texture2D,
+                0, PixelInternalFormat.Rgba, mTextureData.Width, mTextureData.Height,
+                0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
+                PixelType.UnsignedByte, mTextureData.Scan0);
+
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+                (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+                (int)TextureMagFilter.Linear);
+
+                mTextureBitmap.UnlockBits(mTextureData);
+            }
+            else
+            {
+                throw new Exception("Could not find file " + filepath);
+            }
+        }
+        
         protected override void OnUnload(EventArgs e)
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
