@@ -62,14 +62,8 @@ namespace Labs.ACW
                 throw new ApplicationException("Index data not loaded onto graphics card correctly");
             }
 
-            if(mIsModel)
-            {
-                GL.EnableVertexAttribArray(mPositionLocation);
-                GL.VertexAttribPointer(mPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
-                GL.EnableVertexAttribArray(mNormalLocation);
-                GL.VertexAttribPointer(mNormalLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
-            }
-            else if(!mHasTexture)
+
+            if(!mHasTexture)
             {
                 GL.EnableVertexAttribArray(mPositionLocation);
                 GL.VertexAttribPointer(mPositionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
