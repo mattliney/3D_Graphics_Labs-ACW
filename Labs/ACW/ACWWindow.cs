@@ -45,7 +45,9 @@ namespace Labs.ACW
         private bool mIsScalingUp = true;
         private bool mIsMovingForward = true;
 
-        private int mTexture_ID;
+        private int[] mTexture_ID = new int[2];
+        private int mTextureIndex = 0;
+        private int mTextureSamplerLocation;
         private Bitmap mTextureBitmap;
         private BitmapData mTextureData;
 
@@ -53,7 +55,10 @@ namespace Labs.ACW
 
         protected override void OnLoad(EventArgs e)
         {
-            LoadTexture();
+            string filePath1 = @"ACW\texture.jpg";
+            string filePath2 = @"ACW\texture2.jpg";
+            LoadTexture(filePath1);
+            LoadTexture(filePath2);
 
             GL.ClearColor(Color4.Black);
             GL.Enable(EnableCap.DepthTest);
@@ -65,8 +70,7 @@ namespace Labs.ACW
             int vPositionLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vPosition");
             int vNormalLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vNormal");
             int vTextureLocation = GL.GetAttribLocation(mShader.ShaderProgramID, "vTexCoords");
-            int uTextureSamplerLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uTextureSampler");
-            GL.Uniform1(uTextureSamplerLocation, 0);
+            mTextureSamplerLocation = GL.GetUniformLocation(mShader.ShaderProgramID, "uTextureSampler");
 
             //Vertices and Indices
 
@@ -358,6 +362,8 @@ namespace Labs.ACW
             GL.BindVertexArray(mVAO_ID[0]);
             GL.DrawElements(BeginMode.Triangles, mArmadillo.Indices.Length, DrawElementsType.UnsignedInt, 0);
 
+            GL.Uniform1(mTextureSamplerLocation, 1);
+
             mat = Matrix4.CreateTranslation(0, -1f, -1f) * Matrix4.CreateScale(0.5f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[1]);
@@ -372,6 +378,8 @@ namespace Labs.ACW
             GL.BindVertexArray(mVAO_ID[3]);
             GL.DrawElements(PrimitiveType.TriangleFan, 24, DrawElementsType.UnsignedInt, 0);
 
+            GL.Uniform1(mTextureSamplerLocation, 0);
+
             mat = Matrix4.CreateTranslation(0, -4f, -2f) * Matrix4.CreateScale(0.5f) * Matrix4.CreateRotationX(1.5708f);
             GL.UniformMatrix4(uModelLocation, true, ref mat);
             GL.BindVertexArray(mVAO_ID[1]);
@@ -382,20 +390,21 @@ namespace Labs.ACW
             this.SwapBuffers();
         }
 
-        private void LoadTexture()
+        private void LoadTexture(string pFilePath)
         {
-            string filepath = @"ACW\texture.jpg";
-            if (System.IO.File.Exists(filepath))
+            if (System.IO.File.Exists(pFilePath))
             {
-                mTextureBitmap = new Bitmap(filepath);
+                mTextureBitmap = new Bitmap(pFilePath);
                 mTextureData = mTextureBitmap.LockBits(
                 new System.Drawing.Rectangle(0, 0, mTextureBitmap.Width,
                 mTextureBitmap.Height), ImageLockMode.ReadOnly,
                 System.Drawing.Imaging.PixelFormat.Format32bppRgb);
 
-                GL.ActiveTexture(TextureUnit.Texture0);
-                GL.GenTextures(1, out mTexture_ID);
-                GL.BindTexture(TextureTarget.Texture2D, mTexture_ID);
+                if (mTextureIndex == 0) { GL.ActiveTexture(TextureUnit.Texture0); }
+                else { GL.ActiveTexture(TextureUnit.Texture1); }
+                GL.GenTextures(1, out mTexture_ID[mTextureIndex]);
+                GL.BindTexture(TextureTarget.Texture2D, mTexture_ID[mTextureIndex]);
+                mTextureIndex++;
 
                 GL.TexImage2D(TextureTarget.Texture2D,
                 0, PixelInternalFormat.Rgba, mTextureData.Width, mTextureData.Height,
@@ -411,7 +420,7 @@ namespace Labs.ACW
             }
             else
             {
-                throw new Exception("Could not find file " + filepath);
+                throw new Exception("Could not find file " + pFilePath);
             }
 
         }
@@ -423,6 +432,8 @@ namespace Labs.ACW
             GL.BindVertexArray(0);
             GL.DeleteBuffers(mVBO_ID.Length, mVBO_ID);
             GL.DeleteVertexArrays(mVAO_ID.Length, mVAO_ID);
+            GL.DeleteTexture(0);
+            GL.DeleteTexture(1);
             mShader.Delete();
             base.OnUnload(e);
         }
